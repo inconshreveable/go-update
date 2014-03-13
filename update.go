@@ -29,9 +29,9 @@ download progress,
 package update
 
 import (
+	"bitbucket.org/kardianos/osext"
 	"compress/gzip"
 	"fmt"
-	"bitbucket.org/kardianos/osext"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -137,7 +137,7 @@ func NewDownload(url string) *Download {
 		HttpClient: new(http.Client),
 		Progress:   make(chan int),
 		Method:     "GET",
-		Url: url,
+		Url:        url,
 	}
 }
 
@@ -412,6 +412,8 @@ func FromStream(newBinary io.Reader) (err error, errRecover error) {
 	if err != nil {
 		return
 	}
+
+	_ = hideWindowsFile(oldExecPath)
 
 	// move the new exectuable in to become the new program
 	err = os.Rename(newExecPath, thisExecPath)
