@@ -181,7 +181,7 @@ func New() *Update {
 }
 
 // Target configures the update to update the file at the given path.
-// The emptry string means 'the executable file of the running program'.
+// The empty string means 'the executable file of the running program'.
 func (u *Update) Target(path string) *Update {
 	u.TargetPath = path
 	return u
@@ -196,7 +196,7 @@ func (u *Update) ApplyPatch(patchType PatchType) *Update {
 }
 
 // VerifyChecksum configures the update to verify that the
-// the update has the given sha256 checksum.
+// update has the given sha256 checksum.
 func (u *Update) VerifyChecksum(checksum []byte) *Update {
 	u.Checksum = checksum
 	return u
@@ -383,7 +383,7 @@ func (u *Update) FromStream(updateWith io.Reader) (err error, errRecover error) 
 		return
 	}
 
-	// move the new exectuable in to become the new program
+	// move the new executable in to become the new program
 	err = os.Rename(newPath, updatePath)
 
 	if err != nil {
