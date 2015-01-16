@@ -282,7 +282,7 @@ func (u *Update) FromFile(path string) (err error, errRecover error) {
 //
 // 3. If configured, verifies the RSA signature with a public key.
 //
-// 4. Creates a new file, /path/to/.target.new with mode 0755 with the contents of the updated file
+// 4. Creates a new file, /path/to/.target.new with the same mode bits and contents of the updated file
 //
 // 5. Renames /path/to/target to /path/to/.target.old
 //
@@ -349,9 +349,16 @@ func (u *Update) FromStream(updateWith io.Reader) (err error, errRecover error) 
 	updateDir := filepath.Dir(updatePath)
 	filename := filepath.Base(updatePath)
 
-	// Copy the contents of of newbinary to a the new executable file
+	// read mode bits from old file
+	fi, err := os.Stat(updatePath)
+	if err != nil {
+		return
+	}
+	fileMode := fi.Mode()
+
+	// Copy the contents of the new binary to the new executable file
 	newPath := filepath.Join(updateDir, fmt.Sprintf(".%s.new", filename))
-	fp, err := os.OpenFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755)
+	fp, err := os.OpenFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, fileMode)
 	if err != nil {
 		return
 	}
@@ -408,9 +415,16 @@ func (u *Update) CanUpdate() (err error) {
 	fileDir := filepath.Dir(path)
 	fileName := filepath.Base(path)
 
+	// read mode bits from old file
+	fi, err := os.Stat(path)
+	if err != nil {
+		return
+	}
+	fileMode := fi.Mode()
+
 	// attempt to open a file in the file's directory
 	newPath := filepath.Join(fileDir, fmt.Sprintf(".%s.new", fileName))
-	fp, err := os.OpenFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755)
+	fp, err := os.OpenFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, fileMode)
 	if err != nil {
 		return
 	}
