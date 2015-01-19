@@ -128,6 +128,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"syscall"
 )
 
 // The type of a binary patch, if any. Only bsdiff is supported
@@ -356,6 +357,10 @@ func (u *Update) FromStream(updateWith io.Reader) (err error, errRecover error) 
 	}
 	fileMode := fi.Mode()
 
+	// set umask to 0 so that we can set mode bits properly
+	oldMode := syscall.Umask(0000)
+	defer syscall.Umask(oldMode)
+
 	// Copy the contents of the new binary to the new executable file
 	newPath := filepath.Join(updateDir, fmt.Sprintf(".%s.new", filename))
 	fp, err := os.OpenFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, fileMode)
@@ -421,6 +426,10 @@ func (u *Update) CanUpdate() (err error) {
 		return
 	}
 	fileMode := fi.Mode()
+
+	// set umask to 0 so that we can set mode bits properly
+	oldMode := syscall.Umask(0000)
+	defer syscall.Umask(oldMode)
 
 	// attempt to open a file in the file's directory
 	newPath := filepath.Join(fileDir, fmt.Sprintf(".%s.new", fileName))
