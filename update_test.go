@@ -12,12 +12,16 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"syscall"
 	"testing"
 )
 
 var (
 	oldFile = []byte{0xDE, 0xAD, 0xBE, 0xEF}
 	newFile = []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06}
+
+	// set umask to 0 so that we can set mode bits properly
+	_ = syscall.Umask(0000)
 )
 
 func cleanup(path string) {
@@ -43,6 +47,14 @@ func validateUpdate(path string, err error, t *testing.T) {
 
 	if !bytes.Equal(buf, newFile) {
 		t.Fatalf("File was not updated! Bytes read: %v, Bytes expected: %v", buf, newFile)
+	}
+
+	// mode bits should always be 0777
+	fi, err := os.Stat(path)
+	if err != nil {
+		t.Fatal("Could not stat file!")
+	} else if fi.Mode() != 0777 {
+		t.Fatalf("File mode bits not preserved! Expected %v, got %v", os.FileMode(0777), fi.Mode())
 	}
 }
 
