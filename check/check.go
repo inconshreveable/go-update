@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"runtime"
 
-	"bitbucket.org/kardianos/osext"
+	"github.com/kardianos/osext"
 	"github.com/inconshreveable/go-update"
 )
 
