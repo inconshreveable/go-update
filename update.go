@@ -123,6 +123,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -154,6 +155,9 @@ type Update struct {
 
 	// signature to use for signature verification
 	Signature []byte
+
+	// configurable http client can be passed to download
+	HTTPClient *http.Client
 }
 
 func (u *Update) getPath() (string, error) {
@@ -252,7 +256,7 @@ func (u *Update) VerifySignatureWithPEM(publicKeyPEM []byte) (*Update, error) {
 // FromUrl updates the target with the contents of the given URL.
 func (u *Update) FromUrl(url string) (err error, errRecover error) {
 	target := new(download.MemoryTarget)
-	err = download.New(url, target).Get()
+	err = download.New(url, target, u.HTTPClient).Get()
 	if err != nil {
 		return
 	}
