@@ -5,14 +5,17 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/kr/binarydist"
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/kr/binarydist"
 )
 
 var (
@@ -92,6 +95,30 @@ func TestFromUrl(t *testing.T) {
 	}))
 
 	err, _ = New().Target(fName).FromUrl("http://" + addr)
+	validateUpdate(fName, err, t)
+}
+
+func TestFromUrlCustomHTTPClient(t *testing.T) {
+	t.Parallel()
+
+	fName := "TestFromUrl"
+	defer cleanup(fName)
+	writeOldFile(fName, t)
+
+	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write(newFile)
+	}))
+
+	server.StartTLS()
+
+	noTLSClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+	testUpdate := &Update{HTTPClient: noTLSClient}
+
+	err, _ := testUpdate.Target(fName).FromUrl(server.URL)
 	validateUpdate(fName, err, t)
 }
 
