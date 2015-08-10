@@ -7,12 +7,29 @@ It provides the flexibility to implement different updating user experiences
 like auto-updating, or manual user-initiated updates. It also boasts
 advanced features like binary patching and code signing verification.
 
-Updating your program to a new version is as easy as:
+Example of updating from a URL:
 
-	err, errRecover := update.New().FromUrl("http://release.example.com/2.0/myprogram")
-	if err != nil {
-		fmt.Printf("Update failed: %v\n", err)
-	}
+```go
+import (
+    "fmt"
+    "net/http"
+
+    "github.com/inconshreveable/go-update"
+)
+
+func doUpdate(url string) error {
+    resp, err := http.Get(url)
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+    err := update.Apply(resp.Body, &update.Options{})
+    if err != nil {
+        // error handling
+    }
+    return err
+}
+```
 
 ## Features
 
