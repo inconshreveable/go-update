@@ -1,7 +1,9 @@
-# go-update: Automatically update Go programs from the internet
+# go-update: Automatically update Go programs from the internet [![godoc reference](https://godoc.org/github.com/inconshreveable/go-update?status.png)](https://godoc.org/github.com/inconshreveable/go-update)
 
-go-update allows a program to update itself by replacing its executable file
-with a new version. It provides the flexibility to implement different updating user experiences
+Package update provides functionality to implement secure, self-updating Go programs (or other single-file targets)
+A program can update itself by replacing its executable file with a new version.
+
+It provides the flexibility to implement different updating user experiences
 like auto-updating, or manual user-initiated updates. It also boasts
 advanced features like binary patching and code signing verification.
 
@@ -12,12 +14,6 @@ Updating your program to a new version is as easy as:
 		fmt.Printf("Update failed: %v\n", err)
 	}
 
-## Documentation and API Reference
-
-Comprehensive API documentation and code examples are available in the code documentation available on godoc.org:
-
-### [https://godoc.org/github.com/inconshreveable/go-update](https://godoc.org/github.com/inconshreveable/go-update)
-
 ## Features
 
 - Cross platform support (Windows too!)
@@ -27,11 +23,11 @@ Comprehensive API documentation and code examples are available in the code docu
 - Support for updating arbitrary files
 
 ## [equinox.io](https://equinox.io)
-go-update provides the primitives for building self-updating applications, but there a number of other challenges
+go-update provides the primitives for building self-updating applications, but there a number of other pieces
 involved in a complete updating solution such as hosting, code signing, update channels, gradual rollout,
-dynamically computing binary patches, tracking update metrics like versions and failures, plus more.
+dynamically computing binary patches, tracking update metrics, etc.
 
-I provide this service, a complete solution, free for open source projects, at [equinox.io](https://equinox.io).
+[equinox.io](https://equinox.io) is a provider of that complete solution.
 
 ## License
 Apache
