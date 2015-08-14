@@ -127,9 +127,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/inconshreveable/go-update/download"
 	"github.com/kardianos/osext"
 	"github.com/kr/binarydist"
+	"gopkg.in/inconshreveable/go-update.v0/download"
 )
 
 // The type of a binary patch, if any. Only bsdiff is supported
