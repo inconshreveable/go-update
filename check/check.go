@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/inconshreveable/go-update"
 	"github.com/kardianos/osext"
+	"gopkg.in/inconshreveable/go-update.v0"
 )
 
 type Initiative string
