@@ -40,11 +40,21 @@ func doUpdate(url string) error {
 - Support for updating arbitrary files
 
 ## [equinox.io](https://equinox.io)
-go-update provides the primitives for building self-updating applications, but there a number of other pieces
-involved in a complete updating solution such as hosting, code signing, update channels, gradual rollout,
-dynamically computing binary patches, tracking update metrics, etc.
+[equinox.io](https://equinox.io) is a complete ready-to-go updating solution built on top of go-update that provides:
 
-[equinox.io](https://equinox.io) is a provider of that complete solution.
+- Hosted updates
+- Update channels (stable, beta, nightly, ...)
+- Dynamically computed binary diffs
+- Automatic key generation and code
+- Release tooling with proper code signing
+- Update/download metrics
+
+## Older API Versions
+Did your build just break because the go-update API changed? You have two options:
+
+1. Update your import to `gopkg.in/inconshreveable/go-update.v0`
+1. Vendor your dependency on it with a tool like [gb](http://getgb.io/) or [govendor](https://github.com/kardianos/govendor)
 
 ## License
 Apache
+
