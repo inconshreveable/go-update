@@ -11,7 +11,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kr/binarydist"
+	"github.com/inconshreveable/go-update/internal/binarydist"
 )
 
 var (
