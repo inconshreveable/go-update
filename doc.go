@@ -71,7 +71,8 @@ have an appropriate checksum (that was otherwise retrived via a secure channel)
 specified as a hex string.
 
 	import (
-		"crypto/sha256"
+		"crypto"
+		_ "crypto/sha256"
 		"encoding/hex"
 		"io"
 
@@ -84,7 +85,7 @@ specified as a hex string.
 			return err
 		}
 		err = update.Apply(binary, &update.Options{
-			Hash: sha256.New(), 	// this is the default, you don't need to specify it
+			Hash: crypto.SHA256, 	// this is the default, you don't need to specify it
 			Checksum: checksum,
 		})
 		if err != nil {
@@ -107,7 +108,8 @@ into their application. When they issue a new release, the issuer must sign the 
 with the private key and distribute the signature along with the update.
 
 	import (
-		"crypto/sha256"
+		"crypto"
+		_ "crypto/sha256"
 		"encoding/hex"
 		"io"
 
@@ -133,7 +135,7 @@ with the private key and distribute the signature along with the update.
 		opts := &update.Options{
 			Checksum: checksum,
 			Signature: signature,
-			Hash: sha256.New(), 	               // this is the default, you don't need to specify it
+			Hash: crypto.SHA256, 	                 // this is the default, you don't need to specify it
 			Verifier: update.NewECDSAVerifier(),   // this is the default, you don't need to specify it
 		}
 		err = opts.SetPublicKeyPEM(publicKey)
