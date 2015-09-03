@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -57,6 +58,51 @@ func TestApplySimple(t *testing.T) {
 		TargetPath: fName,
 	})
 	validateUpdate(fName, err, t)
+}
+
+func TestApplyKeepOld(t *testing.T) {
+	t.Parallel()
+
+	fName := "TestApplyKeepOld"
+	defer cleanup(fName)
+	writeOldFile(fName, t)
+
+	err := Apply(bytes.NewReader(newFile), &Options{
+		TargetPath: fName,
+		KeepOld:    true,
+	})
+	validateUpdate(fName, err, t)
+
+	oldfName := fmt.Sprintf(".%s.old", fName)
+
+	if _, err := os.Stat(oldfName); os.IsNotExist(err) {
+		t.Fatalf("Failed to find the old file: %v", err)
+	}
+
+	cleanup(oldfName)
+}
+
+func TestApplyKeepOldPath(t *testing.T) {
+	t.Parallel()
+
+	fName := "TestApplyKeepOldPath"
+	defer cleanup(fName)
+	writeOldFile(fName, t)
+
+	oldfName := "OldTestApplyKeepOldPath"
+
+	err := Apply(bytes.NewReader(newFile), &Options{
+		TargetPath: fName,
+		KeepOld:    true,
+		OldPath:    oldfName,
+	})
+	validateUpdate(fName, err, t)
+
+	if _, err := os.Stat(oldfName); os.IsNotExist(err) {
+		t.Fatalf("Failed to find the old file: %v", err)
+	}
+
+	cleanup(oldfName)
 }
 
 func TestVerifyChecksum(t *testing.T) {
