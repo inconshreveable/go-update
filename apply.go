@@ -114,7 +114,7 @@ func Apply(update io.Reader, opts *Options) error {
 	fp.Close()
 
 	// this is where we'll move the executable to so that we can swap in the updated replacement
-	oldPath := opts.OldPath
+	oldPath := opts.OldSavePath
 	if oldPath == "" {
 		oldPath = filepath.Join(updateDir, fmt.Sprintf(".%s.old", filename))
 	}
@@ -149,8 +149,8 @@ func Apply(update io.Reader, opts *Options) error {
 		return err
 	}
 
-	// move successful, remove the old binary
-	if !opts.KeepOld {
+	// move successful, remove the old binary if needed
+	if opts.OldSavePath == "" {
 		errRemove := os.Remove(oldPath)
 
 		// windows has trouble with removing old binaries, so hide it instead
@@ -210,12 +210,9 @@ type Options struct {
 	// If non-nil, treat the update contents as a patch and use this object to apply the patch.
 	Patcher Patcher
 
-	// If true, keep the old executable
-	// If false, remove the old executable after update (default)
-	KeepOld bool
-
 	//OldPath defines the path where the old executable is stored after update
-	OldPath string
+	//If set to empty string old executable is removed after update(default)
+	OldSavePath string
 }
 
 // CheckPermissions determines whether the process has the correct permissions to

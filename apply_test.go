@@ -7,7 +7,6 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/pem"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -60,41 +59,18 @@ func TestApplySimple(t *testing.T) {
 	validateUpdate(fName, err, t)
 }
 
-func TestApplyKeepOld(t *testing.T) {
+func TestApplyOldSavePath(t *testing.T) {
 	t.Parallel()
 
-	fName := "TestApplyKeepOld"
+	fName := "TestApplyOldSavePath"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
 
-	err := Apply(bytes.NewReader(newFile), &Options{
-		TargetPath: fName,
-		KeepOld:    true,
-	})
-	validateUpdate(fName, err, t)
-
-	oldfName := fmt.Sprintf(".%s.old", fName)
-
-	if _, err := os.Stat(oldfName); os.IsNotExist(err) {
-		t.Fatalf("Failed to find the old file: %v", err)
-	}
-
-	cleanup(oldfName)
-}
-
-func TestApplyKeepOldPath(t *testing.T) {
-	t.Parallel()
-
-	fName := "TestApplyKeepOldPath"
-	defer cleanup(fName)
-	writeOldFile(fName, t)
-
-	oldfName := "OldTestApplyKeepOldPath"
+	oldfName := "OldSavePath"
 
 	err := Apply(bytes.NewReader(newFile), &Options{
-		TargetPath: fName,
-		KeepOld:    true,
-		OldPath:    oldfName,
+		TargetPath:  fName,
+		OldSavePath: oldfName,
 	})
 	validateUpdate(fName, err, t)
 
