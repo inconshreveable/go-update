@@ -111,7 +111,6 @@ func Apply(update io.Reader, opts Options) error {
 	if err != nil {
 		return err
 	}
-	defer fp.Close()
 	_, err = io.Copy(fp, bytes.NewReader(newBytes))
 	if err != nil {
 		return err
@@ -122,7 +121,10 @@ func Apply(update io.Reader, opts Options) error {
 	fp.Close()
 
 	// this is where we'll move the executable to so that we can swap in the updated replacement
-	oldPath := filepath.Join(updateDir, fmt.Sprintf(".%s.old", filename))
+	oldPath := opts.OldSavePath
+	if oldPath == "" {
+		oldPath = filepath.Join(updateDir, fmt.Sprintf(".%s.old", filename))
+	}
 
 	// delete any existing old exec file - this is necessary on Windows for two reasons:
 	// 1. after a successful update, Windows can't remove the .old file because the process is still running
@@ -154,12 +156,14 @@ func Apply(update io.Reader, opts Options) error {
 		return err
 	}
 
-	// move successful, remove the old binary
-	errRemove := os.Remove(oldPath)
+	// move successful, remove the old binary if needed
+	if opts.OldSavePath == "" {
+		errRemove := os.Remove(oldPath)
 
-	// windows has trouble with removing old binaries, so hide it instead
-	if errRemove != nil {
-		_ = hideFile(oldPath)
+		// windows has trouble with removing old binaries, so hide it instead
+		if errRemove != nil {
+			_ = hideFile(oldPath)
+		}
 	}
 
 	return nil
@@ -212,6 +216,10 @@ type Options struct {
 	// If nil, treat the update as a complete replacement for the contents of the file at TargetPath.
 	// If non-nil, treat the update contents as a patch and use this object to apply the patch.
 	Patcher Patcher
+
+	//OldPath defines the path where the old executable is stored after update
+	//If set to empty string old executable is removed after update(default)
+	OldSavePath string
 }
 
 // CheckPermissions determines whether the process has the correct permissions to
