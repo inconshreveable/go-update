@@ -58,13 +58,8 @@ The `go-update` package makes the following promises about API compatibility:
 1. `go-update` will strive for as few API-breaking changes as possible.
 
 ## API Breaking Changes
-- Sept 3, 2015: The `Options` struct passed to `Apply` was changed to be passed by value instead of passed by pointer. Old API at `28de026`.
-- Aug 9, 2015: 2.0 API. Old API at `221d034` or `gopkg.in/inconshreveable/go-update.v0`.
-
-## Older API Versions
-Did your build just break because the go-update API changed? You have two options:
-
-1. Update your import to `gopkg.in/inconshreveable/go-update.v0`
+- **Sept 3, 2015**: The `Options` struct passed to `Apply` was changed to be passed by value instead of passed by pointer. Old API at `28de026`.
+- **Aug 9, 2015**: 2.0 API. Old API at `221d034` or `gopkg.in/inconshreveable/go-update.v0`.
 
 ## License
 Apache
