@@ -61,6 +61,28 @@ func TestApplySimple(t *testing.T) {
 	validateUpdate(fName, err, t)
 }
 
+func TestApplyOldSavePath(t *testing.T) {
+	t.Parallel()
+
+	fName := "TestApplyOldSavePath"
+	defer cleanup(fName)
+	writeOldFile(fName, t)
+
+	oldfName := "OldSavePath"
+
+	err := Apply(bytes.NewReader(newFile), Options{
+		TargetPath:  fName,
+		OldSavePath: oldfName,
+	})
+	validateUpdate(fName, err, t)
+
+	if _, err := os.Stat(oldfName); os.IsNotExist(err) {
+		t.Fatalf("Failed to find the old file: %v", err)
+	}
+
+	cleanup(oldfName)
+}
+
 func TestVerifyChecksum(t *testing.T) {
 	t.Parallel()
 
