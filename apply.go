@@ -15,6 +15,10 @@ import (
 	"github.com/inconshreveable/go-update/internal/osext"
 )
 
+var (
+	openFile = os.OpenFile
+)
+
 // Apply performs an update of the current executable (or opts.TargetFile, if set) with the contents of the given io.Reader.
 //
 // Apply performs the following actions to ensure a safe cross-platform update:
@@ -103,12 +107,15 @@ func Apply(update io.Reader, opts *Options) error {
 
 	// Copy the contents of of newbinary to a the new executable file
 	newPath := filepath.Join(updateDir, fmt.Sprintf(".%s.new", filename))
-	fp, err := os.OpenFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, opts.TargetMode)
+	fp, err := openFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, opts.TargetMode)
 	if err != nil {
 		return err
 	}
 	defer fp.Close()
 	_, err = io.Copy(fp, bytes.NewReader(newBytes))
+	if err != nil {
+		return err
+	}
 
 	// if we don't call fp.Close(), windows won't let us move the new executable
 	// because the file will still be "in use"
@@ -222,7 +229,7 @@ func (o *Options) CheckPermissions() error {
 
 	// attempt to open a file in the file's directory
 	newPath := filepath.Join(fileDir, fmt.Sprintf(".%s.new", fileName))
-	fp, err := os.OpenFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, o.TargetMode)
+	fp, err := openFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, o.TargetMode)
 	if err != nil {
 		return err
 	}

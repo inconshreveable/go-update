@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -22,6 +23,7 @@ var (
 
 func cleanup(path string) {
 	os.Remove(path)
+	os.Remove(fmt.Sprintf(".%s.new", path))
 }
 
 // we write with a separate name for each test so that we can run them in parallel
@@ -377,5 +379,26 @@ func TestPublicKeyButNoSignature(t *testing.T) {
 	err := Apply(bytes.NewReader(newFile), opts)
 	if err == nil {
 		t.Fatalf("Allowed an update with no signautre when a public key was specified!")
+	}
+}
+
+func TestWriteError(t *testing.T) {
+	t.Parallel()
+	fName := "TestWriteError"
+	defer cleanup(fName)
+	writeOldFile(fName, t)
+
+	openFile = func(name string, flags int, perm os.FileMode) (*os.File, error) {
+		f, err := os.OpenFile(name, flags, perm)
+
+		// simulate Write() error by closing the file prematurely
+		f.Close()
+
+		return f, err
+	}
+
+	err := Apply(bytes.NewReader(newFile), &Options{TargetPath: fName})
+	if err == nil {
+		t.Fatalf("Allowed an update to an empty file")
 	}
 }
