@@ -105,7 +105,7 @@ func Apply(update io.Reader, opts *Options) error {
 	updateDir := filepath.Dir(opts.TargetPath)
 	filename := filepath.Base(opts.TargetPath)
 
-	// Copy the contents of of newbinary to a the new executable file
+	// Copy the contents of newbinary to a new executable file
 	newPath := filepath.Join(updateDir, fmt.Sprintf(".%s.new", filename))
 	fp, err := openFile(newPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, opts.TargetMode)
 	if err != nil {
