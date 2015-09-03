@@ -45,7 +45,7 @@ var (
 // there is no new executable file and the old executable file could not be be moved to its original location. In this
 // case you should notify the user of the bad news and ask them to recover manually. Applications can determine whether
 // the rollback failed by calling RollbackError, see the documentation on that function for additional detail.
-func Apply(update io.Reader, opts *Options) error {
+func Apply(update io.Reader, opts Options) error {
 	// validate
 	verify := false
 	switch {

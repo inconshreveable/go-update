@@ -23,7 +23,7 @@ func doUpdate(url string) error {
         return err
     }
     defer resp.Body.Close()
-    err := update.Apply(resp.Body, &update.Options{})
+    err := update.Apply(resp.Body, update.Options{})
     if err != nil {
         // error handling
     }
@@ -49,6 +49,9 @@ func doUpdate(url string) error {
 - Release tooling with proper code signing
 - Update/download metrics
 
+## Breaking API Changes
+- Sept 3, 2015: The `Options` struct passed to `Apply` was changed to be passed by value instead of passed by pointer.
+
 ## Older API Versions
 Did your build just break because the go-update API changed? You have two options:
 
@@ -57,4 +60,3 @@ Did your build just break because the go-update API changed? You have two option
 
 ## License
 Apache
-

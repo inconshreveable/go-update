@@ -21,7 +21,7 @@ This example shows how to update a program remotely from a URL.
 			return err
 		}
 		defer resp.Body.Close()
-		err := update.Apply(resp.Body, &update.Options{})
+		err := update.Apply(resp.Body, update.Options{})
 		if err != nil {
 			if rerr := update.RollbackError(err); rerr != nil {
 				fmt.Println("Failed to rollback from bad update: %v", rerr)
@@ -47,7 +47,7 @@ may be applied by implementing the Patcher interface.
 	)
 
 	func updateWithPatch(patch io.Reader) error {
-		err := update.Apply(patch, &update.Options{
+		err := update.Apply(patch, update.Options{
 			Patcher: update.NewBSDiffPatcher()
 		})
 		if err != nil {
@@ -84,7 +84,7 @@ specified as a hex string.
 		if err != nil {
 			return err
 		}
-		err = update.Apply(binary, &update.Options{
+		err = update.Apply(binary, update.Options{
 			Hash: crypto.SHA256, 	// this is the default, you don't need to specify it
 			Checksum: checksum,
 		})
@@ -132,7 +132,7 @@ with the private key and distribute the signature along with the update.
 		if err != nil {
 			return err
 		}
-		opts := &update.Options{
+		opts := update.Options{
 			Checksum: checksum,
 			Signature: signature,
 			Hash: crypto.SHA256, 	                 // this is the default, you don't need to specify it
