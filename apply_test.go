@@ -70,7 +70,7 @@ func TestApplyOldSavePath(t *testing.T) {
 
 	oldfName := "OldSavePath"
 
-	err := Apply(bytes.NewReader(newFile), &Options{
+	err := Apply(bytes.NewReader(newFile), Options{
 		TargetPath:  fName,
 		OldSavePath: oldfName,
 	})
