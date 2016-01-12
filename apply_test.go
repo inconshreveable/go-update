@@ -49,8 +49,6 @@ func validateUpdate(path string, err error, t *testing.T) {
 }
 
 func TestApplySimple(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestApplySimple"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -62,8 +60,6 @@ func TestApplySimple(t *testing.T) {
 }
 
 func TestApplyOldSavePath(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestApplyOldSavePath"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -84,8 +80,6 @@ func TestApplyOldSavePath(t *testing.T) {
 }
 
 func TestVerifyChecksum(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestVerifyChecksum"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -98,8 +92,6 @@ func TestVerifyChecksum(t *testing.T) {
 }
 
 func TestVerifyChecksumNegative(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestVerifyChecksumNegative"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -115,8 +107,6 @@ func TestVerifyChecksumNegative(t *testing.T) {
 }
 
 func TestApplyPatch(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestApplyPatch"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -135,8 +125,6 @@ func TestApplyPatch(t *testing.T) {
 }
 
 func TestCorruptPatch(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestCorruptPatch"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -152,8 +140,6 @@ func TestCorruptPatch(t *testing.T) {
 }
 
 func TestVerifyChecksumPatchNegative(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestVerifyChecksumPatchNegative"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -263,9 +249,7 @@ func sign(parsePrivKey func([]byte) (crypto.Signer, error), privatePEM string, s
 }
 
 func TestVerifyECSignature(t *testing.T) {
-	t.Parallel()
-
-	fName := "TestVerifySignature"
+	fName := "TestVerifyECSignature"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
 
@@ -281,9 +265,7 @@ func TestVerifyECSignature(t *testing.T) {
 }
 
 func TestVerifyRSASignature(t *testing.T) {
-	t.Parallel()
-
-	fName := "TestVerifySignature"
+	fName := "TestVerifyRSASignature"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
 
@@ -302,8 +284,6 @@ func TestVerifyRSASignature(t *testing.T) {
 }
 
 func TestVerifyFailBadSignature(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestVerifyFailBadSignature"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -324,8 +304,6 @@ func TestVerifyFailBadSignature(t *testing.T) {
 }
 
 func TestVerifyFailNoSignature(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestVerifySignatureWithPEM"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -352,8 +330,6 @@ VBbP/Ff+05HOqwPC7rJMy1VAJLKg7Cw=
 `
 
 func TestVerifyFailWrongSignature(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestVerifyFailWrongSignature"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -372,8 +348,6 @@ func TestVerifyFailWrongSignature(t *testing.T) {
 }
 
 func TestSignatureButNoPublicKey(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestSignatureButNoPublicKey"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -388,8 +362,6 @@ func TestSignatureButNoPublicKey(t *testing.T) {
 }
 
 func TestPublicKeyButNoSignature(t *testing.T) {
-	t.Parallel()
-
 	fName := "TestPublicKeyButNoSignature"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -405,7 +377,6 @@ func TestPublicKeyButNoSignature(t *testing.T) {
 }
 
 func TestWriteError(t *testing.T) {
-	t.Parallel()
 	fName := "TestWriteError"
 	defer cleanup(fName)
 	writeOldFile(fName, t)
@@ -418,6 +389,9 @@ func TestWriteError(t *testing.T) {
 
 		return f, err
 	}
+	defer func() {
+		openFile = os.OpenFile
+	}()
 
 	err := Apply(bytes.NewReader(newFile), Options{TargetPath: fName})
 	if err == nil {
