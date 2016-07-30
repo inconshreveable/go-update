@@ -5,6 +5,7 @@ import (
 	_ "crypto/sha512" // for tls cipher support
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"runtime"
@@ -125,13 +126,13 @@ func (p *Params) CheckForUpdate(url string, up *update.Update) (*Result, error) 
 		log.Errorf("Error submitting update request: %v", err)
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	// no content means no available update
 	if resp.StatusCode == 204 {
 		return nil, NoUpdateAvailable
 	}
 
-	defer resp.Body.Close()
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Errorf("Error reading response body from update server: %v", err)
@@ -144,7 +145,17 @@ func (p *Params) CheckForUpdate(url string, up *update.Update) (*Result, error) 
 		return nil, err
 	}
 
-	return result, nil
+	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
+		result := &Result{up: up}
+		if err := json.Unmarshal(respBytes, result); err != nil {
+			log.Errorf("Error reading JSON response body from update server: %v", err)
+			return nil, fmt.Errorf("json.Unmarshal: %v (text was %q)", err, string(respBytes))
+		}
+		return result, nil
+	}
+
+	log.Errorf("Error reading JSON response body from update server, status: %d, content: %v", resp.StatusCode, string(respBytes))
+	return nil, errors.New(string(respBytes))
 }
 
 func (p *Params) CheckAndApplyUpdate(url string, up *update.Update) (result *Result, err error, errRecover error) {

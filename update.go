@@ -113,6 +113,7 @@ while outputting a progress meter and supports resuming partial downloads.
 package update
 
 import (
+	"bufio"
 	"bytes"
 	"compress/bzip2"
 	"crypto"
@@ -338,8 +339,22 @@ func (u *Update) FromStream(updateWith io.Reader) (err error, errRecover error) 
 			return
 		}
 	case PATCHTYPE_NONE:
-		// no patch to apply, go on through (with bzip2 decoding).
-		newBytes, err = ioutil.ReadAll(bzip2.NewReader(updateWith))
+		// no patch to apply, go on through
+		var fileHeader []byte
+		bufBytes := bufio.NewReader(updateWith)
+		fileHeader, err = bufBytes.Peek(2)
+		if err != nil {
+			return
+		}
+
+		if bytes.Equal([]byte{0x42, 0x5a}, fileHeader) {
+			// Identifying bzip2 files.
+			updateWith = bzip2.NewReader(bufBytes)
+		} else {
+			updateWith = io.Reader(bufBytes)
+		}
+
+		newBytes, err = ioutil.ReadAll(updateWith)
 		if err != nil {
 			return
 		}
