@@ -169,7 +169,6 @@ func (p *Params) CheckForUpdate(url string, up *update.Update) (*Result, error) 
 	// Working with the result
 	result := &Result{up: up}
 	if err := json.Unmarshal(respBytes, result); err != nil {
-		log.Debugf("bytes: %v", string(respBytes))
 		log.Errorf("Error reading JSON response body from update server: %v", err)
 		return nil, err
 	}
