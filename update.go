@@ -443,6 +443,17 @@ func (u *Update) FromStream(updateWith io.Reader) (err error, errRecover error) 
 	return
 }
 
+// ValidateMessage attempts to validate a message.
+func (u *Update) ValidateMessage(message []byte, expectedSignature []byte, nonce int64) error {
+	if len(message) == 0 {
+		return fmt.Errorf("No message to validate")
+	}
+	if len(expectedSignature) == 0 {
+		return fmt.Errorf("No signature to validate with")
+	}
+	return verifySignature(append(message, []byte(fmt.Sprintf("%d", nonce))...), expectedSignature, u.PublicKey)
+}
+
 // CanUpdate() determines whether the process has the correct permissions to
 // perform the requested update. If the update can proceed, it returns nil, otherwise
 // it returns the error that would occur if an update were attempted.

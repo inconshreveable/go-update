@@ -8,7 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
+	"net/http"
 	"runtime"
+	"time"
 
 	"github.com/getlantern/go-update"
 	"github.com/getlantern/golog"
@@ -69,6 +72,10 @@ type Result struct {
 	Signature string `json:"signature"`
 }
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 // CheckForUpdate makes an HTTP post to a URL with the JSON serialized
 // representation of Params. It returns the deserialized result object
 // returned by the remote endpoint or an error. If you do not set
@@ -121,7 +128,16 @@ func (p *Params) CheckForUpdate(url string, up *update.Update) (*Result, error) 
 		return nil, err
 	}
 
-	resp, err := update.HTTPClient.Post(url, "application/json", bytes.NewReader(body))
+	req, err := http.NewRequest("POST", url, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	nonce := rand.Int63()
+	req.Header.Set("X-Message-Nonce", fmt.Sprintf("%d", nonce))
+
+	resp, err := update.HTTPClient.Do(req)
 	if err != nil {
 		log.Errorf("Error submitting update request: %v", err)
 		return nil, err
@@ -133,14 +149,27 @@ func (p *Params) CheckForUpdate(url string, up *update.Update) (*Result, error) 
 		return nil, NoUpdateAvailable
 	}
 
+	// Reading message.
+	signature, err := hex.DecodeString(resp.Header.Get("X-Message-Signature"))
+	if err != nil {
+		return nil, err
+	}
+
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Errorf("Error reading response body from update server: %v", err)
 		return nil, err
 	}
 
+	// Checking signature
+	if err := up.ValidateMessage(respBytes, signature, nonce); err != nil {
+		return nil, fmt.Errorf("Failed to validate message: %v", err)
+	}
+
+	// Working with the result
 	result := &Result{up: up}
 	if err := json.Unmarshal(respBytes, result); err != nil {
+		log.Debugf("bytes: %v", string(respBytes))
 		log.Errorf("Error reading JSON response body from update server: %v", err)
 		return nil, err
 	}
