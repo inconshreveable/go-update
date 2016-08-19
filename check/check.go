@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
+	mathrand "math/rand"
 	"net/http"
 	"runtime"
 	"time"
@@ -72,8 +72,10 @@ type Result struct {
 	Signature string `json:"signature"`
 }
 
+var rand *mathrand.Rand
+
 func init() {
-	rand.Seed(time.Now().UnixNano())
+	rand = mathrand.New(mathrand.NewSource(time.Now().UnixNano()))
 }
 
 // CheckForUpdate makes an HTTP post to a URL with the JSON serialized
@@ -135,6 +137,9 @@ func (p *Params) CheckForUpdate(url string, up *update.Update) (*Result, error) 
 	req.Header.Set("Content-Type", "application/json")
 
 	nonce := rand.Int63()
+	// This nonce is a random number that is going to alter the server's message
+	// signature, which is sent by the server as a header and verified by the
+	// client.
 	req.Header.Set("X-Message-Nonce", fmt.Sprintf("%d", nonce))
 
 	resp, err := update.HTTPClient.Do(req)
