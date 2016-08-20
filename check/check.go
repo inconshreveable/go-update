@@ -5,9 +5,13 @@ import (
 	_ "crypto/sha512" // for tls cipher support
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	mathrand "math/rand"
+	"net/http"
 	"runtime"
+	"time"
 
 	"github.com/getlantern/go-update"
 	"github.com/getlantern/golog"
@@ -68,6 +72,12 @@ type Result struct {
 	Signature string `json:"signature"`
 }
 
+var rand *mathrand.Rand
+
+func init() {
+	rand = mathrand.New(mathrand.NewSource(time.Now().UnixNano()))
+}
+
 // CheckForUpdate makes an HTTP post to a URL with the JSON serialized
 // representation of Params. It returns the deserialized result object
 // returned by the remote endpoint or an error. If you do not set
@@ -120,31 +130,65 @@ func (p *Params) CheckForUpdate(url string, up *update.Update) (*Result, error) 
 		return nil, err
 	}
 
-	resp, err := update.HTTPClient.Post(url, "application/json", bytes.NewReader(body))
+	req, err := http.NewRequest("POST", url, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	nonce := rand.Int63()
+	// This nonce is a random number that is going to alter the server's message
+	// signature, which is sent by the server as a header and verified by the
+	// client.
+	req.Header.Set("X-Message-Nonce", fmt.Sprintf("%d", nonce))
+
+	resp, err := update.HTTPClient.Do(req)
 	if err != nil {
 		log.Errorf("Error submitting update request: %v", err)
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	// no content means no available update
 	if resp.StatusCode == 204 {
 		return nil, NoUpdateAvailable
 	}
 
-	defer resp.Body.Close()
+	// Reading message.
+	signature, err := hex.DecodeString(resp.Header.Get("X-Message-Signature"))
+	if err != nil {
+		return nil, err
+	}
+
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Errorf("Error reading response body from update server: %v", err)
 		return nil, err
 	}
 
+	// Checking signature
+	if err := up.ValidateMessage(respBytes, signature, nonce); err != nil {
+		return nil, fmt.Errorf("Failed to validate message: %v", err)
+	}
+
+	// Working with the result
 	result := &Result{up: up}
 	if err := json.Unmarshal(respBytes, result); err != nil {
 		log.Errorf("Error reading JSON response body from update server: %v", err)
 		return nil, err
 	}
 
-	return result, nil
+	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
+		result := &Result{up: up}
+		if err := json.Unmarshal(respBytes, result); err != nil {
+			log.Errorf("Error reading JSON response body from update server: %v", err)
+			return nil, fmt.Errorf("json.Unmarshal: %v (text was %q)", err, string(respBytes))
+		}
+		return result, nil
+	}
+
+	log.Errorf("Error reading JSON response body from update server, status: %d, content: %v", resp.StatusCode, string(respBytes))
+	return nil, errors.New(string(respBytes))
 }
 
 func (p *Params) CheckAndApplyUpdate(url string, up *update.Update) (result *Result, err error, errRecover error) {
