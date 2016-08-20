@@ -347,6 +347,8 @@ func (u *Update) FromStream(updateWith io.Reader) (err error, errRecover error) 
 			return
 		}
 
+		// The content is always bzip2 compressed except when running test, in
+		// which case is not prefixed with the magic byte sequence for sure.
 		if bytes.Equal([]byte{0x42, 0x5a}, fileHeader) {
 			// Identifying bzip2 files.
 			updateWith = bzip2.NewReader(bufBytes)
