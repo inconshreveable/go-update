@@ -113,7 +113,6 @@ while outputting a progress meter and supports resuming partial downloads.
 package update
 
 import (
-	"bufio"
 	"bytes"
 	"compress/bzip2"
 	"crypto"
@@ -339,24 +338,8 @@ func (u *Update) FromStream(updateWith io.Reader) (err error, errRecover error) 
 			return
 		}
 	case PATCHTYPE_NONE:
-		// no patch to apply, go on through
-		var fileHeader []byte
-		bufBytes := bufio.NewReader(updateWith)
-		fileHeader, err = bufBytes.Peek(2)
-		if err != nil {
-			return
-		}
-
-		// The content is always bzip2 compressed except when running test, in
-		// which case is not prefixed with the magic byte sequence for sure.
-		if bytes.Equal([]byte{0x42, 0x5a}, fileHeader) {
-			// Identifying bzip2 files.
-			updateWith = bzip2.NewReader(bufBytes)
-		} else {
-			updateWith = io.Reader(bufBytes)
-		}
-
-		newBytes, err = ioutil.ReadAll(updateWith)
+		// no patch to apply, go on through (with bzip2 decoding).
+		newBytes, err = ioutil.ReadAll(bzip2.NewReader(updateWith))
 		if err != nil {
 			return
 		}
@@ -443,17 +426,6 @@ func (u *Update) FromStream(updateWith io.Reader) (err error, errRecover error) 
 	}
 
 	return
-}
-
-// ValidateMessage attempts to validate a message.
-func (u *Update) ValidateMessage(message []byte, expectedSignature []byte, nonce int64) error {
-	if len(message) == 0 {
-		return fmt.Errorf("No message to validate")
-	}
-	if len(expectedSignature) == 0 {
-		return fmt.Errorf("No signature to validate with")
-	}
-	return verifySignature(append(message, []byte(fmt.Sprintf("%d", nonce))...), expectedSignature, u.PublicKey)
 }
 
 // CanUpdate() determines whether the process has the correct permissions to
