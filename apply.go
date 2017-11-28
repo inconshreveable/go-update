@@ -201,7 +201,7 @@ type Options struct {
 	// Create TargetPath replacement with this file mode. If zero, defaults to 0755.
 	TargetMode os.FileMode
 
-	// Checksum of the new binary to verify against. If nil, no checksum or signature verification is done.
+	// Checksum of the new binary to verify against. If nil, no checksum is done.
 	Checksum []byte
 
 	// Public key to use for signature verification. If nil, no signature verification is done.
