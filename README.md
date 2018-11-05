@@ -23,7 +23,7 @@ func doUpdate(url string) error {
         return err
     }
     defer resp.Body.Close()
-    err := update.Apply(resp.Body, update.Options{})
+    err = update.Apply(resp.Body, update.Options{})
     if err != nil {
         // error handling
     }
