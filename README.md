@@ -14,7 +14,7 @@ import (
     "fmt"
     "net/http"
 
-    "github.com/inconshreveable/go-update"
+    "github.com/browserstack/go-update"
 )
 
 func doUpdate(url string) error {
