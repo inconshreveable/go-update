@@ -122,6 +122,14 @@ func Apply(update io.Reader, opts Options) error {
 	// because the file will still be "in use"
 	fp.Close()
 
+	// if there is a callback for testing the new binary, run that now
+	if opts.TestBinary != nil {
+		err = opts.TestBinary(newPath)
+		if err != nil {
+			return err
+		}
+	}
+
 	// this is where we'll move the executable to so that we can swap in the updated replacement
 	oldPath := opts.OldSavePath
 	removeOld := opts.OldSavePath == ""
@@ -223,6 +231,12 @@ type Options struct {
 	// Store the old executable file at this path after a successful update.
 	// The empty string means the old executable file will be removed after the update.
 	OldSavePath string
+
+	// If specified, this callback function will be invoked after downloading the new binary but before
+	// moving it into place to replace the old one. This can be used to do some sort of validation that
+	// the new binary runs as expected. Any errors returned here are propagated back out to the caller
+	// of the Apply function.
+	TestBinary func(binary string) error
 }
 
 // CheckPermissions determines whether the process has the correct permissions to
