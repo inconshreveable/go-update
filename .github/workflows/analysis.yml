@@ -1,0 +1,34 @@
+name: Static Analysis
+on: [push, pull_request]
+permissions:
+  contents: read
+
+jobs:
+  static_analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+    - uses: WillAbides/setup-go-faster@v1.7.0
+      with:
+        go-version: '1.18'
+
+    - name: Get dependencies
+      run: |
+        go install golang.org/x/tools/cmd/goimports@latest
+        go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+        go install honnef.co/go/tools/cmd/staticcheck@v0.3.0
+
+    - name: Vet
+      run: go vet ./...
+
+    - name: Goimports
+      run: test -z $(goimports -e -d . | tee /dev/stderr)
+
+    - name: Gocyclo
+      run: gocyclo -over 20 .
+
+    - name: Staticcheck
+      run: staticcheck ./...
