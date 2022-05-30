@@ -20,5 +20,8 @@ jobs:
       with:
         go-version: ${{ matrix.go-version }}
 
+    - name: Get dependencies
+      run: sudo apt-get update && sudo apt-get install bsdiff
+
     - name: Test
       run: go test -tags ci ./...
