@@ -172,10 +172,8 @@ func search(I []int, obuf, nbuf []byte, st, en int) (pos, n int) {
 	x := st + (en-st)/2
 	if bytes.Compare(obuf[I[x]:], nbuf) < 0 {
 		return search(I, obuf, nbuf, x, en)
-	} else {
-		return search(I, obuf, nbuf, st, x)
 	}
-	panic("unreached")
+	return search(I, obuf, nbuf, st, x)
 }
 
 // Diff computes the difference between old and new, according to the bsdiff
