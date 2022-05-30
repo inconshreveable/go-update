@@ -207,6 +207,7 @@ func diffBytes(obuf, nbuf []byte) ([]byte, error) {
 	return patch.buf, nil
 }
 
+//gocyclo:ignore
 func diff(obuf, nbuf []byte, patch io.WriteSeeker) error {
 	var lenf int
 	I := qsufsort(obuf)
