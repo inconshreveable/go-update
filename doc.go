@@ -11,7 +11,7 @@ This example shows how to update a program remotely from a URL.
 		"fmt"
 		"net/http"
 
-		"github.com/fynelabs/go-update"
+		"github.com/fynelabs/self-update"
 	)
 
 	func doUpdate(url string) error {
@@ -43,7 +43,7 @@ may be applied by implementing the Patcher interface.
 		"encoding/hex"
 		"io"
 
-		"github.com/fynelabs/go-update"
+		"github.com/fynelabs/self-update"
 	)
 
 	func updateWithPatch(patch io.Reader) error {
@@ -63,7 +63,7 @@ take the appropriate steps to guarantee the authenticity of the new code. While
 checksum verification is important, it should always be combined with signature
 verification (next section) to guarantee that the code came from a trusted party.
 
-go-update validates SHA256 checksums by default, but this is pluggable via the Hash
+self-update validates SHA256 checksums by default, but this is pluggable via the Hash
 property on the Options struct.
 
 This example shows how to guarantee that the newly-updated binary is verified to
@@ -76,7 +76,7 @@ specified as a hex string.
 		"encoding/hex"
 		"io"
 
-		"github.com/fynelabs/go-update"
+		"github.com/fynelabs/self-update"
 	)
 
 	func updateWithChecksum(binary io.Reader, hexChecksum string) error {
@@ -113,7 +113,7 @@ with the private key and distribute the signature along with the update.
 		"encoding/hex"
 		"io"
 
-		"github.com/fynelabs/go-update"
+		"github.com/fynelabs/self-update"
 	)
 
 	var publicKey = []byte(`
@@ -152,7 +152,7 @@ with the private key and distribute the signature along with the update.
 
 Building Single-File Go Binaries
 
-In order to update a Go application with go-update, you must distributed it as a single executable.
+In order to update a Go application with self-update, you must distributed it as a single executable.
 This is often easy, but some applications require static assets (like HTML and CSS asset files or TLS certificates).
 In order to update applications like these, you'll want to make sure to embed those asset files into
 the distributed binary with a tool like go-bindata (my favorite): https://github.com/jteeuwen/go-bindata
@@ -163,7 +163,7 @@ Mechanisms and protocols for determining whether an update should be applied and
 out of scope for this package. Please consult go-tuf (https://github.com/flynn/go-tuf) or Equinox (https://equinox.io)
 for more complete solutions.
 
-go-update only works for self-updating applications that are distributed as a single binary, i.e.
+self-update only works for self-updating applications that are distributed as a single binary, i.e.
 applications that do not have additional assets or dependency files.
 Updating application that are distributed as mutliple on-disk files is out of scope, although this
 may change in future versions of this library.

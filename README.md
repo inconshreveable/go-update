@@ -1,6 +1,6 @@
-# go-update: Build self-updating Go programs [![godoc reference](https://godoc.org/github.com/fynelabs/go-update?status.png)](https://godoc.org/github.com/fynelabs/go-update)
+# self-update: Build self-updating Fyne programs [![godoc reference](https://godoc.org/github.com/fynelabs/self-update?status.png)](https://godoc.org/github.com/fynelabs/self-update)
 
-Package update provides functionality to implement secure, self-updating Go programs (or other single-file targets)
+Package update provides functionality to implement secure, self-updating Fyne programs (or other single-file targets)
 A program can update itself by replacing its executable file with a new version.
 
 It provides the flexibility to implement different updating user experiences
@@ -14,7 +14,7 @@ import (
     "fmt"
     "net/http"
 
-    "github.com/fynelabs/go-update"
+    "github.com/fynelabs/self-update"
 )
 
 func doUpdate(url string) error {
@@ -33,19 +33,19 @@ func doUpdate(url string) error {
 
 ## Features
 
-- Cross platform support (Windows too!)
+- Cross platform support
 - Binary patch application
 - Checksum verification
 - Code signing verification
 - Support for updating arbitrary files
 
 ## API Compatibility Promises
-The master branch of `go-update` is *not* guaranteed to have a stable API over time. For any production application, you should vendor
-your dependency on `go-update` with a tool like git submodules, [gb](http://getgb.io/) or [govendor](https://github.com/kardianos/govendor).
+The master branch of `self-update` is *not* guaranteed to have a stable API over time. For any production application, you should vendor
+your dependency on `self-update` with `go vendor`.
 
-The `go-update` package makes the following promises about API compatibility:
+The `self-update` package makes the following promises about API compatibility:
 1. A list of all API-breaking changes will be documented in this README.
-1. `go-update` will strive for as few API-breaking changes as possible.
+1. `self-update` will strive for as few API-breaking changes as possible.
 
 ## API Breaking Changes
 - **May 30, 2022**: Many changes moving to a new API that will be supported going forward.

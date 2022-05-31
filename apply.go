@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fynelabs/go-update/internal/osext"
+	"github.com/fynelabs/self-update/internal/osext"
 )
 
 var (

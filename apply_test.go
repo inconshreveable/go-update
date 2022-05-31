@@ -12,7 +12,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/fynelabs/go-update/internal/binarydist"
+	"github.com/fynelabs/self-update/internal/binarydist"
 )
 
 var (
