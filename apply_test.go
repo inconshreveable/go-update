@@ -1,4 +1,4 @@
-package update
+package selfupdate
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/fynelabs/self-update/internal/binarydist"
+	"github.com/fynelabs/selfupdate/internal/binarydist"
 )
 
 var (

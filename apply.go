@@ -1,4 +1,4 @@
-package update
+package selfupdate
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fynelabs/self-update/internal/osext"
+	"github.com/fynelabs/selfupdate/internal/osext"
 )
 
 var (

@@ -1,5 +1,5 @@
 /*
-Package update provides functionality to implement secure, self-updating Go programs (or other single-file targets).
+Package selfupdate provides functionality to implement secure, self-updating Go programs (or other single-file targets).
 
 For complete updating solutions please see Equinox (https://equinox.io) and go-tuf (https://github.com/flynn/go-tuf).
 
@@ -11,7 +11,7 @@ This example shows how to update a program remotely from a URL.
 		"fmt"
 		"net/http"
 
-		"github.com/fynelabs/self-update"
+		"github.com/fynelabs/selfupdate"
 	)
 
 	func doUpdate(url string) error {
@@ -43,7 +43,7 @@ may be applied by implementing the Patcher interface.
 		"encoding/hex"
 		"io"
 
-		"github.com/fynelabs/self-update"
+		"github.com/fynelabs/selfupdate"
 	)
 
 	func updateWithPatch(patch io.Reader) error {
@@ -63,7 +63,7 @@ take the appropriate steps to guarantee the authenticity of the new code. While
 checksum verification is important, it should always be combined with signature
 verification (next section) to guarantee that the code came from a trusted party.
 
-self-update validates SHA256 checksums by default, but this is pluggable via the Hash
+selfupdate validates SHA256 checksums by default, but this is pluggable via the Hash
 property on the Options struct.
 
 This example shows how to guarantee that the newly-updated binary is verified to
@@ -76,7 +76,7 @@ specified as a hex string.
 		"encoding/hex"
 		"io"
 
-		"github.com/fynelabs/self-update"
+		"github.com/fynelabs/selfupdate"
 	)
 
 	func updateWithChecksum(binary io.Reader, hexChecksum string) error {
@@ -113,7 +113,7 @@ with the private key and distribute the signature along with the update.
 		"encoding/hex"
 		"io"
 
-		"github.com/fynelabs/self-update"
+		"github.com/fynelabs/selfupdate"
 	)
 
 	var publicKey = []byte(`
@@ -163,10 +163,10 @@ Mechanisms and protocols for determining whether an update should be applied and
 out of scope for this package. Please consult go-tuf (https://github.com/flynn/go-tuf) or Equinox (https://equinox.io)
 for more complete solutions.
 
-self-update only works for self-updating applications that are distributed as a single binary, i.e.
+selfupdate only works for self-updating applications that are distributed as a single binary, i.e.
 applications that do not have additional assets or dependency files.
 Updating application that are distributed as mutliple on-disk files is out of scope, although this
 may change in future versions of this library.
 
 */
-package update
+package selfupdate

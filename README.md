@@ -14,7 +14,7 @@ import (
     "fmt"
     "net/http"
 
-    "github.com/fynelabs/self-update"
+    "github.com/fynelabs/selfupdate"
 )
 
 func doUpdate(url string) error {
@@ -40,12 +40,12 @@ func doUpdate(url string) error {
 - Support for updating arbitrary files
 
 ## API Compatibility Promises
-The master branch of `self-update` is *not* guaranteed to have a stable API over time. For any production application, you should vendor
-your dependency on `self-update` with `go vendor`.
+The master branch of `selfupdate` is *not* guaranteed to have a stable API over time. For any production application, you should vendor
+your dependency on `selfupdate` with `go vendor`.
 
-The `self-update` package makes the following promises about API compatibility:
+The `selfupdate` package makes the following promises about API compatibility:
 1. A list of all API-breaking changes will be documented in this README.
-1. `self-update` will strive for as few API-breaking changes as possible.
+1. `selfupdate` will strive for as few API-breaking changes as possible.
 
 ## API Breaking Changes
 - **May 30, 2022**: Many changes moving to a new API that will be supported going forward.
