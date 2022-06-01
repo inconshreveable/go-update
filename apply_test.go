@@ -3,6 +3,7 @@ package selfupdate
 import (
 	"bytes"
 	"crypto"
+	"crypto/ed25519"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/x509"
@@ -218,6 +219,18 @@ Oh9AgABamU0eb3p3vXTISClVgV7ifq1HyZ7BSUhMfaY2Jk/s3sUHCWFxPZe9sgEG
 KinIY/373KIkIV/5g4h2v1w330IWcfptxKcY/Er3DJr38f695GE=
 -----END RSA PRIVATE KEY-----`
 
+const ed25519PublicKey = `
+-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAcunf3tcE+Sz7syMd1WAJ1vbDHzvgRQkxzShU2IpbUAA=
+-----END PUBLIC KEY-----
+`
+
+const ed25519PrivateKey = `
+-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIFYOU2dyUJmkRhVw0xnrxzxWezUHfWrkGCGUaXbnTApX
+-----END PRIVATE KEY-----
+`
+
 func signec(privatePEM string, source []byte, t *testing.T) []byte {
 	parseFn := func(p []byte) (crypto.Signer, error) { return x509.ParseECPrivateKey(p) }
 	return sign(parseFn, privatePEM, source, t)
@@ -226,6 +239,25 @@ func signec(privatePEM string, source []byte, t *testing.T) []byte {
 func signrsa(privatePEM string, source []byte, t *testing.T) []byte {
 	parseFn := func(p []byte) (crypto.Signer, error) { return x509.ParsePKCS1PrivateKey(p) }
 	return sign(parseFn, privatePEM, source, t)
+}
+
+func signed25519(privatePEM string, source []byte, t *testing.T) []byte {
+	block, _ := pem.Decode([]byte(privatePEM))
+	if block == nil {
+		t.Fatalf("Failed to parse private key PEM")
+	}
+
+	priv, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		t.Fatalf("Failed to parse private key DER: %v", err)
+	}
+
+	ed25519signer, ok := priv.(ed25519.PrivateKey)
+	if !ok {
+		t.Fatalf("It should have been an ED25519 private key")
+	}
+
+	return ed25519.Sign(ed25519signer, source)
 }
 
 func sign(parsePrivKey func([]byte) (crypto.Signer, error), privatePEM string, source []byte, t *testing.T) []byte {
@@ -283,6 +315,22 @@ func TestVerifyRSASignature(t *testing.T) {
 	validateUpdate(fName, err, t)
 }
 
+func TestVerifyEd25519Signature(t *testing.T) {
+	fName := "TestVerifyEd25519Signature"
+	defer cleanup(fName)
+	writeOldFile(fName, t)
+
+	opts := Options{TargetPath: fName}
+	err := opts.SetPublicKeyPEM([]byte(ed25519PublicKey))
+	if err != nil {
+		t.Fatalf("Could not parse public key: %v", err)
+	}
+
+	opts.Signature = signed25519(ed25519PrivateKey, newFile, t)
+	err = Apply(bytes.NewReader(newFile), opts)
+	validateUpdate(fName, err, t)
+}
+
 func TestVerifyFailBadSignature(t *testing.T) {
 	fName := "TestVerifyFailBadSignature"
 	defer cleanup(fName)
@@ -293,6 +341,26 @@ func TestVerifyFailBadSignature(t *testing.T) {
 		Signature:  []byte{0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA},
 	}
 	err := opts.SetPublicKeyPEM([]byte(ecdsaPublicKey))
+	if err != nil {
+		t.Fatalf("Could not parse public key: %v", err)
+	}
+
+	err = Apply(bytes.NewReader(newFile), opts)
+	if err == nil {
+		t.Fatalf("Did not fail with bad signature")
+	}
+}
+
+func TestVerifyFailEd25519BadSignature(t *testing.T) {
+	fName := "TestVerifyFailEd25519BadSignature"
+	defer cleanup(fName)
+	writeOldFile(fName, t)
+
+	opts := Options{
+		TargetPath: fName,
+		Signature:  []byte{0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA},
+	}
+	err := opts.SetPublicKeyPEM([]byte(ed25519PublicKey))
 	if err != nil {
 		t.Fatalf("Could not parse public key: %v", err)
 	}
@@ -329,6 +397,12 @@ VBbP/Ff+05HOqwPC7rJMy1VAJLKg7Cw=
 -----END EC PRIVATE KEY-----
 `
 
+const wrongEd25519Key = `
+-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIKXZu3lfNP/WUpfmRnOmRwuTcPnZ0utt1ja+Uo26zXP5
+-----END PRIVATE KEY-----
+`
+
 func TestVerifyFailWrongSignature(t *testing.T) {
 	fName := "TestVerifyFailWrongSignature"
 	defer cleanup(fName)
@@ -341,6 +415,24 @@ func TestVerifyFailWrongSignature(t *testing.T) {
 	}
 
 	opts.Signature = signec(wrongKey, newFile, t)
+	err = Apply(bytes.NewReader(newFile), opts)
+	if err == nil {
+		t.Fatalf("Verified an update that was signed by an untrusted key!")
+	}
+}
+
+func TestVerifyFailWrongEd25519Signature(t *testing.T) {
+	fName := "TestVerifyFailWrongEd25519Signature"
+	defer cleanup(fName)
+	writeOldFile(fName, t)
+
+	opts := Options{TargetPath: fName}
+	err := opts.SetPublicKeyPEM([]byte(ed25519PublicKey))
+	if err != nil {
+		t.Fatalf("Could not parse public key: %v", err)
+	}
+
+	opts.Signature = signed25519(wrongEd25519Key, newFile, t)
 	err = Apply(bytes.NewReader(newFile), opts)
 	if err == nil {
 		t.Fatalf("Verified an update that was signed by an untrusted key!")
