@@ -3,6 +3,7 @@ package selfupdate
 import (
 	"bytes"
 	"crypto"
+	"crypto/ed25519"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
@@ -317,11 +318,19 @@ func (o *Options) verifyChecksum(updated []byte) error {
 }
 
 func (o *Options) verifySignature(updated []byte) error {
-	checksum, err := checksumFor(o.Hash, updated)
-	if err != nil {
-		return err
+	if publicKey, ok := o.PublicKey.(ed25519.PublicKey); ok {
+		valid := ed25519.Verify(publicKey, updated, o.Signature)
+		if !valid {
+			return fmt.Errorf("invalid ed25519 signature")
+		}
+		return nil
+	} else {
+		checksum, err := checksumFor(o.Hash, updated)
+		if err != nil {
+			return err
+		}
+		return o.Verifier.VerifySignature(checksum, o.Signature, o.Hash, o.PublicKey)
 	}
-	return o.Verifier.VerifySignature(checksum, o.Signature, o.Hash, o.PublicKey)
 }
 
 func checksumFor(h crypto.Hash, payload []byte) ([]byte, error) {
