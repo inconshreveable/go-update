@@ -4,6 +4,7 @@ import (
 	"crypto/ed25519"
 	"errors"
 	"io"
+	"sync"
 	"time"
 )
 
@@ -39,10 +40,14 @@ type Version struct {
 }
 
 type Updater struct {
+	lock sync.Mutex
 	conf *Config
 }
 
 func (u *Updater) CheckNow() error {
+	u.lock.Lock()
+	defer u.lock.Unlock()
+
 	v := u.conf.Current
 	if v == nil {
 		mtime, err := lastModifiedExecutable()
