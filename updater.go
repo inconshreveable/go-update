@@ -1,6 +1,7 @@
 package selfupdate
 
 import (
+	"crypto/ed25519"
 	"errors"
 	"io"
 	"time"
@@ -11,14 +12,15 @@ var ErrNotSupported = errors.New("operating system not supported")
 
 type Source interface {
 	Get(*Version) (io.Reader, error)
-	GetSignature() (string, error)
+	GetSignature() ([64]byte, error)
 	LatestVersion() (*Version, error)
 }
 
 type Config struct {
-	Current  *Version
-	Source   Source
-	Schedule Schedule
+	Current   *Version
+	Source    Source
+	Schedule  Schedule
+	PublicKey ed25519.PublicKey
 
 	ProgressCallback       func(float64, error) // if present will call back with 0.0 at the start, rising through to 1.0 at the end if the progress is known. A negative start number will be sent if size is unknown, any error will pass as is and the process is considered done
 	RestartConfirmCallback func() bool          // if present will ask for user acceptance before restarting app
@@ -65,11 +67,21 @@ func (u *Updater) CheckNow() error {
 		}
 	}
 
-	r, err := u.conf.Source.Get(latest)
+	s, err := u.conf.Source.GetSignature()
 	if err != nil {
 		return err
 	}
-	err = Apply(r, Options{})
+
+	r, err := u.conf.Source.Get(v)
+	if err != nil {
+		return err
+	}
+
+	opts := Options{}
+	opts.Signature = s[:]
+	opts.PublicKey = u.conf.PublicKey
+
+	err = Apply(r, opts)
 	if err != nil {
 		return err
 	}
