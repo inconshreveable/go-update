@@ -24,9 +24,5 @@ func Restart() error {
 		Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
 		Sys:   &syscall.SysProcAttr{},
 	})
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
