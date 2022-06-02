@@ -22,7 +22,7 @@ func sign() *cli.Command {
 	return &cli.Command{
 		Name:        "sign",
 		Usage:       "Generate a signature for a Fyne binary and store it in a .signature file",
-		Description: "You must specify the executalbe and may specify a filename for the Private Key you want to use",
+		Description: "You must specify the executable and may specify a filename for the Private Key you want to use",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "private-key",
