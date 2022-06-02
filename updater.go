@@ -20,7 +20,7 @@ type Config struct {
 	Source   Source
 	Schedule Schedule
 
-	ProgressCallback       func(float32, error) // if present will call back with 0.0 at the start, rising through to 1.0 at the end if the progress is known. A negative start number will be sent if size is unknown, any error will pass as is and the process is considered done
+	ProgressCallback       func(float64, error) // if present will call back with 0.0 at the start, rising through to 1.0 at the end if the progress is known. A negative start number will be sent if size is unknown, any error will pass as is and the process is considered done
 	RestartConfirmCallback func() bool          // if present will ask for user acceptance before restarting app
 	UpgradeConfirmCallback func(string) bool    // if present will ask for user acceptance, it can present the message passed
 }
