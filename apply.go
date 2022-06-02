@@ -12,8 +12,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"github.com/fynelabs/selfupdate/internal/osext"
 )
 
 var (
@@ -272,17 +270,7 @@ func (o *Options) SetPublicKeyPEM(pembytes []byte) error {
 
 func (o *Options) getPath() (string, error) {
 	if o.TargetPath == "" {
-		exe, err := osext.Executable()
-		if err != nil {
-			return "", err
-		}
-
-		exe, err = filepath.EvalSymlinks(exe)
-		if err != nil {
-			return "", err
-		}
-
-		return exe, nil
+		return getExecutableRealPath()
 	} else {
 		return o.TargetPath, nil
 	}
