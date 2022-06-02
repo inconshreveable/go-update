@@ -106,12 +106,21 @@ func Manage(conf *Config) (*Updater, error) {
 }
 
 // ManualUpdate applies a specific update manually instead of managing the update of this app automatically.
-func ManualUpdate(s Source) error {
+func ManualUpdate(s Source, publicKey ed25519.PublicKey) error {
 	v := &Version{}
-	r, err := s.Get(v)
+	r, _, err := s.Get(v)
 	if err != nil {
 		return err
 	}
 
-	return Apply(r, Options{})
+	signature, err := s.GetSignature()
+	if err != nil {
+		return err
+	}
+
+	opts := Options{}
+	opts.Signature = signature[:]
+	opts.PublicKey = publicKey
+
+	return Apply(r, opts)
 }
