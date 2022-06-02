@@ -82,7 +82,9 @@ func (u *Updater) CheckNow() error {
 	opts.Signature = s[:]
 	opts.PublicKey = u.conf.PublicKey
 
-	err = Apply(r, opts)
+	pr := &progressReader{Reader: r, progressCallback: u.conf.ProgressCallback, contentLength: contentLength}
+
+	err = Apply(pr, opts)
 	if err != nil {
 		return err
 	}
