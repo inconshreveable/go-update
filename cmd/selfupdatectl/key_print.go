@@ -11,7 +11,7 @@ func KeyPrint() *cli.Command {
 
 	return &cli.Command{
 		Name:        "print-key",
-		Usage:       "display public key in Go format that can be used directly in your project",
+		Usage:       "Display public key in Go format that can be used directly in your project",
 		Description: "You may specify a public ed25519 PEM public key to display.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{

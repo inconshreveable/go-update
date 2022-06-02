@@ -12,7 +12,6 @@ import (
 )
 
 type Application struct {
-	Executable string
 	PrivateKey string
 	PublicKey  string
 }
@@ -22,8 +21,8 @@ func Sign() *cli.Command {
 
 	return &cli.Command{
 		Name:        "sign",
-		Usage:       "Generate a signature for a Fyne binary and store it in FyneApp.toml",
-		Description: "You may specify a filename for the Private Key, the executable and the FyneApp.toml you want to use",
+		Usage:       "Generate a signature for a Fyne binary and store it in a .signature file",
+		Description: "You must specify the executalbe and may specify a filename for the Private Key you want to use",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "private-key",
@@ -32,21 +31,8 @@ func Sign() *cli.Command {
 				Destination: &a.PrivateKey,
 				Value:       "ed25519.key",
 			},
-			&cli.StringFlag{
-				Name:        "executable",
-				Aliases:     []string{"exe"},
-				Usage:       "The executable to generate a signature for.",
-				Destination: &a.Executable,
-			},
 		},
 		Action: func(ctx *cli.Context) error {
-			if a.Executable != "" {
-				err := a.Sign(a.Executable)
-				if err != nil {
-					return err
-				}
-			}
-
 			for _, exe := range ctx.Args().Slice() {
 				err := a.Sign(exe)
 				if err != nil {

@@ -18,8 +18,8 @@ func Check() *cli.Command {
 
 	return &cli.Command{
 		Name:        "check",
-		Usage:       "Check that a signature for a Fyne binary in FyneApp.toml is correct",
-		Description: "You may specify a filename for the Private Key, the executable and the FyneApp.toml you want to check",
+		Usage:       "Check that a signature for a Fyne binary is correct",
+		Description: "You must specify the executalbe and may specify a filename for the Public Key you want to use.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "public-key",
@@ -28,21 +28,8 @@ func Check() *cli.Command {
 				Destination: &a.PublicKey,
 				Value:       "ed25519.pem",
 			},
-			&cli.StringFlag{
-				Name:        "executable",
-				Aliases:     []string{"exe"},
-				Usage:       "The executable to check the signature for.",
-				Destination: &a.Executable,
-			},
 		},
 		Action: func(ctx *cli.Context) error {
-			if a.Executable != "" {
-				err := a.Check(a.Executable)
-				if err != nil {
-					return err
-				}
-			}
-
 			for _, exe := range ctx.Args().Slice() {
 				err := a.Check(exe)
 				if err != nil {
