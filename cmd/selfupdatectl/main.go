@@ -13,10 +13,10 @@ func main() {
 		Usage:       "A command line helper for various selfupdate tools.",
 		Description: "The selfupdatectl command provides tooling for self updating fyne applications.",
 		Commands: []*cli.Command{
-			CreateKeys(),
-			Sign(),
-			Check(),
-			KeyPrint(),
+			createKeys(),
+			sign(),
+			check(),
+			keyPrint(),
 		},
 	}
 

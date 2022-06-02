@@ -13,8 +13,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func Check() *cli.Command {
-	a := &Application{}
+func check() *cli.Command {
+	a := &application{}
 
 	return &cli.Command{
 		Name:        "check",
@@ -25,13 +25,13 @@ func Check() *cli.Command {
 				Name:        "public-key",
 				Aliases:     []string{"pub"},
 				Usage:       "The public key file to use to verify the signature for this executable.",
-				Destination: &a.PublicKey,
+				Destination: &a.publicKey,
 				Value:       "ed25519.pem",
 			},
 		},
 		Action: func(ctx *cli.Context) error {
 			for _, exe := range ctx.Args().Slice() {
-				err := a.Check(exe)
+				err := a.check(exe)
 				if err != nil {
 					return err
 				}
@@ -42,8 +42,8 @@ func Check() *cli.Command {
 	}
 }
 
-func (a *Application) Check(executable string) error {
-	verifier, err := publicKeyVerifier(a.PublicKey)
+func (a *application) check(executable string) error {
+	verifier, err := publicKeyVerifier(a.publicKey)
 	if err != nil {
 		return err
 	}

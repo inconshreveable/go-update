@@ -11,13 +11,13 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type Application struct {
-	PrivateKey string
-	PublicKey  string
+type application struct {
+	privateKey string
+	publicKey  string
 }
 
-func Sign() *cli.Command {
-	a := &Application{}
+func sign() *cli.Command {
+	a := &application{}
 
 	return &cli.Command{
 		Name:        "sign",
@@ -28,13 +28,13 @@ func Sign() *cli.Command {
 				Name:        "private-key",
 				Aliases:     []string{"priv"},
 				Usage:       "The private key file to use to sign this executable.",
-				Destination: &a.PrivateKey,
+				Destination: &a.privateKey,
 				Value:       "ed25519.key",
 			},
 		},
 		Action: func(ctx *cli.Context) error {
 			for _, exe := range ctx.Args().Slice() {
-				err := a.Sign(exe)
+				err := a.sign(exe)
 				if err != nil {
 					return err
 				}
@@ -45,8 +45,8 @@ func Sign() *cli.Command {
 	}
 }
 
-func (a *Application) Sign(executable string) error {
-	signer, err := privateKeySigner(a.PrivateKey)
+func (a *application) sign(executable string) error {
+	signer, err := privateKeySigner(a.privateKey)
 	if err != nil {
 		return err
 	}

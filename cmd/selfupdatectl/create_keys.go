@@ -10,13 +10,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type Keys struct {
-	PrivateKey string
-	PublicKey  string
-}
-
-func CreateKeys() *cli.Command {
-	k := &Keys{}
+func createKeys() *cli.Command {
+	a := &application{}
 
 	return &cli.Command{
 		Name:        "create-keys",
@@ -27,24 +22,24 @@ func CreateKeys() *cli.Command {
 				Name:        "private-key",
 				Aliases:     []string{"priv"},
 				Usage:       "The private key file to store the new key in.",
-				Destination: &k.PrivateKey,
+				Destination: &a.privateKey,
 				Value:       "ed25519.key",
 			},
 			&cli.StringFlag{
 				Name:        "public-key",
 				Aliases:     []string{"pub"},
 				Usage:       "The public key file to store the new key in.",
-				Destination: &k.PublicKey,
+				Destination: &a.publicKey,
 				Value:       "ed25519.pem",
 			},
 		},
 		Action: func(_ *cli.Context) error {
-			return k.CreateKeys()
+			return a.createKeys()
 		},
 	}
 }
 
-func (k *Keys) CreateKeys() error {
+func (a *application) createKeys() error {
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return err
@@ -60,7 +55,7 @@ func (k *Keys) CreateKeys() error {
 		Bytes: b,
 	}
 
-	err = ioutil.WriteFile(k.PrivateKey, pem.EncodeToMemory(block), 0600)
+	err = ioutil.WriteFile(a.privateKey, pem.EncodeToMemory(block), 0600)
 	if err != nil {
 		return err
 	}
@@ -75,6 +70,6 @@ func (k *Keys) CreateKeys() error {
 		Bytes: b,
 	}
 
-	err = ioutil.WriteFile(k.PublicKey, pem.EncodeToMemory(block), 0644)
+	err = ioutil.WriteFile(a.publicKey, pem.EncodeToMemory(block), 0644)
 	return err
 }

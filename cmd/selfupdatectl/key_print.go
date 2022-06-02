@@ -6,8 +6,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func KeyPrint() *cli.Command {
-	a := &Application{}
+func keyPrint() *cli.Command {
+	a := &application{}
 
 	return &cli.Command{
 		Name:        "print-key",
@@ -18,18 +18,18 @@ func KeyPrint() *cli.Command {
 				Name:        "public-key",
 				Aliases:     []string{"pub"},
 				Usage:       "The public key file to use to verify the signature for this executable.",
-				Destination: &a.PublicKey,
+				Destination: &a.publicKey,
 				Value:       "ed25519.pem",
 			},
 		},
 		Action: func(ctx *cli.Context) error {
-			return a.KeyPrint()
+			return a.keyPrint()
 		},
 	}
 }
 
-func (a *Application) KeyPrint() error {
-	verifier, err := publicKeyVerifier(a.PublicKey)
+func (a *application) keyPrint() error {
+	verifier, err := publicKeyVerifier(a.publicKey)
 	if err != nil {
 		return err
 	}
