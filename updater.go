@@ -108,8 +108,21 @@ func (u *Updater) Restart() error {
 
 // Manage sets up an Updater and runs it to manage the current executable.
 func Manage(conf *Config) (*Updater, error) {
+	updater := &Updater{conf: conf}
+
+	if updater.conf.Schedule.FetchOnStart {
+		updater.CheckNow()
+	}
+
+	go func() {
+		for {
+			time.Sleep(updater.conf.Schedule.Interval)
+			updater.CheckNow()
+		}
+	}()
+
 	// TODO check if we can support the current app!
-	return &Updater{conf: conf}, nil
+	return updater, nil
 }
 
 // ManualUpdate applies a specific update manually instead of managing the update of this app automatically.
