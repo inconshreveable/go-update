@@ -34,7 +34,7 @@ func TestHTTPSourceCheckSignature(t *testing.T) {
 	log.Println(file, " -- ", err)
 	assert.Nil(t, err)
 	assert.NotNil(t, file)
-	assert.Equal(t, 32099400, contentLength)
+	assert.Equal(t, int64(32099400), contentLength)
 
 	body, err := ioutil.ReadAll(file)
 	assert.Nil(t, err)
