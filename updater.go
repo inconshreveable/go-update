@@ -11,7 +11,7 @@ import (
 var ErrNotSupported = errors.New("operating system not supported")
 
 type Source interface {
-	Get(*Version) (io.Reader, error)
+	Get(*Version) (io.ReadCloser, int64, error)
 	GetSignature() ([64]byte, error)
 	LatestVersion() (*Version, error)
 }
@@ -72,10 +72,11 @@ func (u *Updater) CheckNow() error {
 		return err
 	}
 
-	r, err := u.conf.Source.Get(v)
+	r, contentLength, err := u.conf.Source.Get(v)
 	if err != nil {
 		return err
 	}
+	defer r.Close()
 
 	opts := Options{}
 	opts.Signature = s[:]
