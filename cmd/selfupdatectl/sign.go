@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 
@@ -118,5 +117,5 @@ func executableContent(executable string) ([]byte, error) {
 	}
 	defer executableFile.Close()
 
-	return io.ReadAll(executableFile)
+	return ioutil.ReadAll(executableFile)
 }

@@ -133,5 +133,8 @@ func readSignature(executable string) ([64]byte, error) {
 		return [64]byte{}, fmt.Errorf("ed25519 signature must be 64 bytes long and was %v", n)
 	}
 
-	return *(*[64]byte)(writer.Bytes()), nil
+	r := [64]byte{}
+	copy(r[:], writer.Bytes())
+
+	return r, nil
 }
