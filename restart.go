@@ -7,7 +7,10 @@ import (
 	"github.com/fynelabs/selfupdate/internal/osext"
 )
 
-func Restart() error {
+// Restart will attempt to restar the current application, any error will be returned.
+// If the exiter function is passed in it will be responsible for terminating the old processes.
+// If exiter is passed an error it can assume the restart failed and handle appropriately.
+func Restart(exiter func(error)) error {
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -24,5 +27,11 @@ func Restart() error {
 		Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
 		Sys:   &syscall.SysProcAttr{},
 	})
+
+	if exiter != nil {
+		exiter(err)
+	} else if err == nil {
+		os.Exit(0)
+	}
 	return err
 }
