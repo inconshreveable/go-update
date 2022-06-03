@@ -110,11 +110,11 @@ func (u *Updater) Restart() error {
 func Manage(conf *Config) (*Updater, error) {
 	updater := &Updater{conf: conf}
 
-	if updater.conf.Schedule.FetchOnStart {
-		updater.CheckNow()
-	}
-
 	go func() {
+		if updater.conf.Schedule.FetchOnStart {
+			updater.CheckNow()
+		}
+
 		for {
 			time.Sleep(updater.conf.Schedule.Interval)
 			updater.CheckNow()
