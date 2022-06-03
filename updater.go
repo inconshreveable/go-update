@@ -1,8 +1,10 @@
 package selfupdate
 
 import (
+	"crypto/ed25519"
 	"errors"
 	"io"
+	"sync"
 	"time"
 )
 
@@ -10,15 +12,16 @@ import (
 var ErrNotSupported = errors.New("operating system not supported")
 
 type Source interface {
-	Get(*Version) (io.Reader, error)
-	GetSignature() (string, error)
+	Get(*Version) (io.ReadCloser, int64, error)
+	GetSignature() ([64]byte, error)
 	LatestVersion() (*Version, error)
 }
 
 type Config struct {
-	Current  *Version
-	Source   Source
-	Schedule Schedule
+	Current   *Version
+	Source    Source
+	Schedule  Schedule
+	PublicKey ed25519.PublicKey
 
 	ProgressCallback       func(float64, error) // if present will call back with 0.0 at the start, rising through to 1.0 at the end if the progress is known. A negative start number will be sent if size is unknown, any error will pass as is and the process is considered done
 	RestartConfirmCallback func() bool          // if present will ask for user acceptance before restarting app
@@ -38,10 +41,14 @@ type Version struct {
 }
 
 type Updater struct {
+	lock sync.Mutex
 	conf *Config
 }
 
 func (u *Updater) CheckNow() error {
+	u.lock.Lock()
+	defer u.lock.Unlock()
+
 	v := u.conf.Current
 	if v == nil {
 		mtime, err := lastModifiedExecutable()
@@ -66,11 +73,24 @@ func (u *Updater) CheckNow() error {
 		}
 	}
 
-	r, err := u.conf.Source.Get(latest)
+	s, err := u.conf.Source.GetSignature()
 	if err != nil {
 		return err
 	}
-	err = Apply(r, Options{})
+
+	r, contentLength, err := u.conf.Source.Get(v)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	opts := Options{}
+	opts.Signature = s[:]
+	opts.PublicKey = u.conf.PublicKey
+
+	pr := &progressReader{Reader: r, progressCallback: u.conf.ProgressCallback, contentLength: contentLength}
+
+	err = Apply(pr, opts)
 	if err != nil {
 		return err
 	}
@@ -89,17 +109,41 @@ func (u *Updater) Restart() error {
 
 // Manage sets up an Updater and runs it to manage the current executable.
 func Manage(conf *Config) (*Updater, error) {
+	updater := &Updater{conf: conf}
+
+	go func() {
+		if updater.conf.Schedule.FetchOnStart {
+			updater.CheckNow()
+		}
+
+		if updater.conf.Schedule.Interval != 0 {
+			for {
+				time.Sleep(updater.conf.Schedule.Interval)
+				updater.CheckNow()
+			}
+		}
+	}()
+
 	// TODO check if we can support the current app!
-	return &Updater{conf: conf}, nil
+	return updater, nil
 }
 
 // ManualUpdate applies a specific update manually instead of managing the update of this app automatically.
-func ManualUpdate(s Source) error {
+func ManualUpdate(s Source, publicKey ed25519.PublicKey) error {
 	v := &Version{}
-	r, err := s.Get(v)
+	r, _, err := s.Get(v)
 	if err != nil {
 		return err
 	}
 
-	return Apply(r, Options{})
+	signature, err := s.GetSignature()
+	if err != nil {
+		return err
+	}
+
+	opts := Options{}
+	opts.Signature = signature[:]
+	opts.PublicKey = publicKey
+
+	return Apply(r, opts)
 }
