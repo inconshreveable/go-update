@@ -116,9 +116,11 @@ func Manage(conf *Config) (*Updater, error) {
 			updater.CheckNow()
 		}
 
-		for {
-			time.Sleep(updater.conf.Schedule.Interval)
-			updater.CheckNow()
+		if updater.conf.Schedule.Interval != 0 {
+			for {
+				time.Sleep(updater.conf.Schedule.Interval)
+				updater.CheckNow()
+			}
 		}
 	}()
 
