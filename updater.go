@@ -84,13 +84,9 @@ func (u *Updater) CheckNow() error {
 	}
 	defer r.Close()
 
-	opts := Options{}
-	opts.Signature = s[:]
-	opts.PublicKey = u.conf.PublicKey
-
 	pr := &progressReader{Reader: r, progressCallback: u.conf.ProgressCallback, contentLength: contentLength}
 
-	err = Apply(pr, opts)
+	err = applyUpdate(pr, u.conf.PublicKey, s)
 	if err != nil {
 		return err
 	}
@@ -141,7 +137,11 @@ func ManualUpdate(s Source, publicKey ed25519.PublicKey) error {
 		return err
 	}
 
-	opts := Options{}
+	return applyUpdate(r, publicKey, signature)
+}
+
+func applyUpdate(r io.Reader, publicKey ed25519.PublicKey, signature [64]byte) error {
+	opts := &Options{}
 	opts.Signature = signature[:]
 	opts.PublicKey = publicKey
 
