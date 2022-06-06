@@ -101,7 +101,7 @@ func (u *Updater) CheckNow() error {
 }
 
 func (u *Updater) Restart() error {
-	return Restart(u.conf.ExitCallback, u.executable)
+	return restart(u.conf.ExitCallback, u.executable)
 }
 
 // Manage sets up an Updater and runs it to manage the current executable.
