@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"runtime"
 	"testing"
 	"time"
 
@@ -46,4 +47,22 @@ func TestHTTPSourceCheckSignature(t *testing.T) {
 
 	ok = ed25519.Verify(wrongPublicKey, body, signature[:])
 	assert.False(t, ok)
+}
+
+func TestReplaceUrlTemplate(t *testing.T) {
+	nochange := "http://localhost/nomad-windows-amd64.exe"
+	change := "http://localhost/nomad-{{.OS}}-{{.Arch}}{{.Ext}}"
+	expected := ""
+	if runtime.GOOS == "windows" {
+		expected = "http://localhost/nomad-" + runtime.GOOS + "-" + runtime.GOARCH + ".exe"
+	} else {
+		expected = "http://localhost/nomad-" + runtime.GOOS + "-" + runtime.GOARCH
+	}
+
+	r := replaceUrlTemplate(nochange)
+	assert.Equal(t, nochange, r)
+
+	r = replaceUrlTemplate(change)
+	assert.NotEqual(t, change, r)
+	assert.Equal(t, expected, r)
 }

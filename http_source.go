@@ -37,25 +37,7 @@ func NewHTTPSource(client *http.Client, base string) Source {
 		client = http.DefaultClient
 	}
 
-	ext := ""
-	if runtime.GOOS == "windows" {
-		ext = ".exe"
-	}
-
-	p := platform{
-		OS:   runtime.GOOS,
-		Arch: runtime.GOARCH,
-		Ext:  ext,
-	}
-
-	t, err := template.New("platform").Parse(base)
-	if err == nil {
-		buf := &bytes.Buffer{}
-		err = t.Execute(buf, p)
-		if err == nil {
-			base = buf.String()
-		}
-	}
+	base = replaceUrlTemplate(base)
 
 	return &HTTPSource{client: client, baseURL: base}
 }
@@ -124,4 +106,29 @@ func (h *HTTPSource) LatestVersion() (*Version, error) {
 	}
 
 	return &Version{Date: t}, nil
+}
+
+func replaceUrlTemplate(base string) string {
+	ext := ""
+	if runtime.GOOS == "windows" {
+		ext = ".exe"
+	}
+
+	p := platform{
+		OS:   runtime.GOOS,
+		Arch: runtime.GOARCH,
+		Ext:  ext,
+	}
+
+	t, err := template.New("platform").Parse(base)
+	if err != nil {
+		return base
+	}
+
+	buf := &bytes.Buffer{}
+	err = t.Execute(buf, p)
+	if err != nil {
+		return base
+	}
+	return buf.String()
 }
