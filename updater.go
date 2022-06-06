@@ -41,8 +41,9 @@ type Version struct {
 }
 
 type Updater struct {
-	lock sync.Mutex
-	conf *Config
+	lock       sync.Mutex
+	conf       *Config
+	executable string
 }
 
 func (u *Updater) CheckNow() error {
@@ -84,13 +85,9 @@ func (u *Updater) CheckNow() error {
 	}
 	defer r.Close()
 
-	opts := Options{}
-	opts.Signature = s[:]
-	opts.PublicKey = u.conf.PublicKey
-
 	pr := &progressReader{Reader: r, progressCallback: u.conf.ProgressCallback, contentLength: contentLength}
 
-	err = Apply(pr, opts)
+	u.executable, err = applyUpdate(pr, u.conf.PublicKey, s)
 	if err != nil {
 		return err
 	}
@@ -104,7 +101,7 @@ func (u *Updater) CheckNow() error {
 }
 
 func (u *Updater) Restart() error {
-	return Restart(u.conf.ExitCallback)
+	return restart(u.conf.ExitCallback, u.executable)
 }
 
 // Manage sets up an Updater and runs it to manage the current executable.
@@ -141,9 +138,18 @@ func ManualUpdate(s Source, publicKey ed25519.PublicKey) error {
 		return err
 	}
 
-	opts := Options{}
+	_, err = applyUpdate(r, publicKey, signature)
+	return err
+}
+
+func applyUpdate(r io.Reader, publicKey ed25519.PublicKey, signature [64]byte) (string, error) {
+	opts := &Options{}
 	opts.Signature = signature[:]
 	opts.PublicKey = publicKey
 
-	return Apply(r, opts)
+	err := apply(r, opts)
+	if err != nil {
+		return "", err
+	}
+	return opts.TargetPath, nil
 }
