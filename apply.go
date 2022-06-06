@@ -18,6 +18,11 @@ var (
 	openFile = os.OpenFile
 )
 
+// Apply is provided for backward compatibility with go-selfupdate original package
+func Apply(update io.Reader, opts Options) error {
+	return apply(update, &opts)
+}
+
 // Apply performs an update of the current executable (or opts.TargetFile, if set) with the contents of the given io.Reader.
 //
 // Apply performs the following actions to ensure a safe cross-platform update:
@@ -44,7 +49,7 @@ var (
 // there is no new executable file and the old executable file could not be be moved to its original location. In this
 // case you should notify the user of the bad news and ask them to recover manually. Applications can determine whether
 // the rollback failed by calling RollbackError, see the documentation on that function for additional detail.
-func Apply(update io.Reader, opts *Options) error {
+func apply(update io.Reader, opts *Options) error {
 	// validate
 	verify := false
 	switch {

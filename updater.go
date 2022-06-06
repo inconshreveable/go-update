@@ -147,7 +147,7 @@ func applyUpdate(r io.Reader, publicKey ed25519.PublicKey, signature [64]byte) (
 	opts.Signature = signature[:]
 	opts.PublicKey = publicKey
 
-	err := Apply(r, opts)
+	err := apply(r, opts)
 	if err != nil {
 		return "", err
 	}
