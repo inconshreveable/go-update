@@ -56,7 +56,7 @@ func main() {
 	publicKey := ed25519.PublicKey{178, 103, 83, 57, 61, 138, 18, 249, 244, 80, 163, 162, 24, 251, 190, 241, 11, 168, 179, 41, 245, 27, 166, 70, 220, 254, 118, 169, 101, 26, 199, 129}
 
 	// The public key above match the signature of the below file served by our CDN
-	httpSource := selfupdate.NewHTTPSource(nil, "http://geoffrey-test-artefacts.fynelabs.com/nomad.exe")
+	httpSource := selfupdate.NewHTTPSource(nil, "http://localhost/{{.Executable}}-{{.OS}}-{{.Arch}}{{.Ext}}")
 	config := &selfupdate.Config{
 		Source:    httpSource,
 		Schedule:  selfupdate.Schedule{FetchOnStart: true, Interval: time.Minute * time.Duration(60)},
@@ -65,7 +65,7 @@ func main() {
 		ProgressCallback: func(f float64, err error) { log.Println("Download", f, "%") },
 		RestartConfirmCallback: func() bool { return true},
 		UpgradeConfirmCallback: func(_ string) bool { return true },
-        ExitCallback: func(_ error) { os.Exit(1) }
+		ExitCallback: func(_ error) { os.Exit(1) }
 	}
 
 	_, err := selfupdate.Manage(config)
