@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"runtime"
 	"text/template"
 )
@@ -17,9 +19,10 @@ type HTTPSource struct {
 var _ Source = (*HTTPSource)(nil)
 
 type platform struct {
-	OS   string
-	Arch string
-	Ext  string
+	OS         string
+	Arch       string
+	Ext        string
+	Executable string
 }
 
 // NewHTTPSource provide a selfupdate.Source that will fetch the specified base URL
@@ -118,6 +121,18 @@ func replaceUrlTemplate(base string) string {
 		OS:   runtime.GOOS,
 		Arch: runtime.GOARCH,
 		Ext:  ext,
+	}
+
+	exe, err := getExecutableRealPath()
+	if err != nil {
+		exe = filepath.Base(os.Args[0])
+	} else {
+		exe = filepath.Base(exe)
+	}
+	if runtime.GOOS == "windows" {
+		p.Executable = exe[:len(exe)-len(".exe")]
+	} else {
+		p.Executable = exe
 	}
 
 	t, err := template.New("platform").Parse(base)
