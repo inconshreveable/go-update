@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 	"text/template"
 )
@@ -124,7 +125,9 @@ func replaceUrlTemplate(base string) string {
 
 	exe, err := getExecutableRealPath()
 	if err != nil {
-		exe = os.Args[0]
+		exe = filepath.Base(os.Args[0])
+	} else {
+		exe = filepath.Base(exe)
 	}
 	if runtime.GOOS == "windows" {
 		p.Executable = exe[:len(exe)-len(".exe")]

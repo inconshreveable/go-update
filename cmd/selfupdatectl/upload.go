@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"html/template"
 	"log"
 	"runtime"
 
@@ -18,7 +17,7 @@ func upload() *cli.Command {
 	var akid string
 	var secret string
 	var baseS3Path string
-	var binaryPattern string
+	var template string
 
 	a := &application{}
 
@@ -77,14 +76,14 @@ func upload() *cli.Command {
 			&cli.StringFlag{
 				Name:        "aws-base-s3-path",
 				Aliases:     []string{"path", "p"},
-				Usage:       "Specify the sub path in which the binary will be uploaded",
+				Usage:       "Specify the sub path in which the executable will be uploaded",
 				Destination: &baseS3Path,
 			},
 			&cli.StringFlag{
-				Name:        "binary-template",
-				Aliases:     []string{"template", "t"},
-				Usage:       "Specify the pattern to use for the binary once uploaded",
-				Destination: &binaryPattern,
+				Name:        "template",
+				Aliases:     []string{"t"},
+				Usage:       "Specify the pattern to use for the executable once uploaded",
+				Destination: &template,
 				Value:       "{{.Executable}}-{{.OS}}-{{.Arch}}{{.Ext}}",
 			},
 		},
