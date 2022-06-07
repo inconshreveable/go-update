@@ -110,9 +110,13 @@ func upload() *cli.Command {
 				Ext:  ext,
 			}
 
-			t, err := template.New("platform").Parse(binaryPattern)
-			if err != nil {
-				return err
+			var t *template.Template
+
+			if binaryPattern != "" {
+				t, err = template.New("platform").Parse(binaryPattern)
+				if err != nil {
+					return err
+				}
 			}
 
 			for _, exe := range ctx.Args().Slice() {
@@ -122,13 +126,23 @@ func upload() *cli.Command {
 					p.Executable = exe
 				}
 
-				buf := &bytes.Buffer{}
-				err = t.Execute(buf, p)
-				if err != nil {
-					return err
+				s3path := ""
+				if baseS3Path != "" {
+					s3path = baseS3Path + "/"
 				}
 
-				err = a.upload(aws, exe, baseS3Path+"/"+buf.String())
+				if binaryPattern != "" {
+					buf := &bytes.Buffer{}
+					err = t.Execute(buf, p)
+					if err != nil {
+						return err
+					}
+					s3path += buf.String()
+				} else {
+					s3path += exe
+				}
+
+				err = a.upload(aws, exe, s3path)
 				if err != nil {
 					return err
 				}
