@@ -17,6 +17,7 @@ func main() {
 			sign(),
 			check(),
 			keyPrint(),
+			upload(),
 		},
 	}
 
