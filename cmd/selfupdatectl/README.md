@@ -29,9 +29,14 @@ This will generate a file named **myprogram.ed25519** of size 64 bytes that cont
 
 To verify that your binary was properly signed, just call `selfupdatectl check myprogram`. It will error if there is a problem with your signature.
 
-## _selfupdatectl upload myprogram ..._
+## _selfupdatectl s3upload myprogram ..._
 
-Finaly, `selfupdatectl upload myprogram` will sign **myprogram** if necessary and upload it along with its signature to a S3 bucket. If no parameter are specified, it will try to read AWS information from configuration file and environment variable. Usually you would need to set *$AWS_S3_REGION* and *$AWS_S3_BUCKET* to match your need.
+Finally, `selfupdatectl s3upload myprogram` will sign **myprogram** if necessary and upload it along with its signature to a S3 bucket. If no parameter are specified, it will try to read AWS information from configuration file and environment variable. Usually you would need to set *$AWS_S3_REGION* and *$AWS_S3_BUCKET* to match your need.
 
 We also by default will upload and rename **myprogram** following the template `{{.Executable}}-{{.OS}}-{{.Arch}}{{.Ext}}` to make sure that your setup is cross platform. The same template can be picked up by the selfupdate.Manage API. If you pass an empty string as a template, no change to **myprogram** name will be applied.
 
+## _selfupdatectl s3uploads myprogram-... targetS3Path_
+
+As an alternative, if your build system already is generating multiple executalbe using some cross compilation technic like fyne-cross, you can use `selfupdatectl s3uploads myprogram-windows-amd64 myprogram-linux-amd64 ... targetS3PAth` to sign them if necessary and upload all of them to that target path. If no additional parameter are specified, it will try to read AWS information from configuration file and environment variable. Usually you would need to set *$AWS_S3_REGION* and *$AWS_S3_BUCKET* to match your need.
+
+This command will not rename the executable when saving them in the S3 bucket.
