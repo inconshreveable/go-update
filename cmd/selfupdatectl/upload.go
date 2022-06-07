@@ -119,32 +119,6 @@ func (a *application) s3upload(aws *cloud.AWSSession, executable string, destina
 	return aws.UploadFile(executable+".ed25519", destination+".ed25519")
 }
 
-type platform struct {
-	OS         string
-	Arch       string
-	Ext        string
-	Executable string
-}
-
-func newPlatform(exe string, goos string, goarch string) *platform {
-	ext := ""
-	if goos == "windows" {
-		ext = ".exe"
-	}
-
-	executable := exe
-	if goos == "windows" {
-		executable = exe[:len(exe)-len(".exe")]
-	}
-
-	return &platform{
-		OS:         goos,
-		Arch:       goarch,
-		Ext:        ext,
-		Executable: executable,
-	}
-}
-
 func buildS3Path(baseS3Path string, exe string) string {
 	s3path := ""
 	if baseS3Path != "" {
