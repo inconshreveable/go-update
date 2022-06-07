@@ -24,7 +24,7 @@ func s3upload() *cli.Command {
 	return &cli.Command{
 		Name:        "s3upload",
 		Usage:       "Upload an executable file to S3, it will be signed and the signature uploaded too",
-		Description: "The executable specified will get his signature generated and checked before being uploaded to a S3 bucket location specified as the last arguments.",
+		Description: "The executable specified will get its signature generated and checked before being uploaded to a S3 bucket location specified as the last arguments.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "private-key",
