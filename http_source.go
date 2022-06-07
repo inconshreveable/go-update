@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"runtime"
+	"text/template"
 )
 
 type HTTPSource struct {
@@ -14,10 +16,29 @@ type HTTPSource struct {
 
 var _ Source = (*HTTPSource)(nil)
 
+type platform struct {
+	OS   string
+	Arch string
+	Ext  string
+}
+
+// NewHTTPSource provide a selfupdate.Source that will fetch the specified base URL
+// for update and signature using the http.Client provided. To help into providing
+// cross platform application, the base is actually a Go Template string where the
+// following parameter are recognized:
+// {{.OS}} will be filled by the runtime OS name
+// {{.Arch}} will be filled by the runtime Arch name
+// {{.Ext}} will be filled by the executable expected extension for the OS
+// As an example the following string `http://localhost/myapp-{{.OS}}-{{.Arch}}{{.Ext}}`
+// would fetch on Windows AMD64 the following URL: `http://localhost/myapp-windows-amd64.exe`
+// and on Linux AMD64: `http://localhost/myapp-linux-amd64`.
 func NewHTTPSource(client *http.Client, base string) Source {
 	if client == nil {
 		client = http.DefaultClient
 	}
+
+	base = replaceUrlTemplate(base)
+
 	return &HTTPSource{client: client, baseURL: base}
 }
 
@@ -85,4 +106,29 @@ func (h *HTTPSource) LatestVersion() (*Version, error) {
 	}
 
 	return &Version{Date: t}, nil
+}
+
+func replaceUrlTemplate(base string) string {
+	ext := ""
+	if runtime.GOOS == "windows" {
+		ext = ".exe"
+	}
+
+	p := platform{
+		OS:   runtime.GOOS,
+		Arch: runtime.GOARCH,
+		Ext:  ext,
+	}
+
+	t, err := template.New("platform").Parse(base)
+	if err != nil {
+		return base
+	}
+
+	buf := &bytes.Buffer{}
+	err = t.Execute(buf, p)
+	if err != nil {
+		return base
+	}
+	return buf.String()
 }
