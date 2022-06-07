@@ -17,7 +17,8 @@ func main() {
 			sign(),
 			check(),
 			keyPrint(),
-			upload(),
+			s3upload(),
+			s3uploads(),
 		},
 	}
 
