@@ -65,6 +65,7 @@ func (u *Updater) CheckNow() error {
 		return err
 	}
 	if !latest.Date.After(v.Date) {
+		logDebug("Local binary time (%v) is recent enough compared to the online version (%v).\n", v.Date.Format(time.RFC1123Z), latest.Date.Format(time.RFC1123Z))
 		return nil
 	}
 
