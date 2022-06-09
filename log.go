@@ -1,13 +1,13 @@
 package selfupdate
 
 // LogError will be called to log any reason that have prevented an executable update
-var LogError func(string, ...interface{}) = nil
+var LogError func(string, ...interface{})
 
 // LogInfo will be called to log any reason that prevented an executable update due to a "user" decision via one of the callback
-var LogInfo func(string, ...interface{}) = nil
+var LogInfo func(string, ...interface{})
 
 // LogDebug will be called to log any reason that prevented an executable update, because there wasn't any available detected
-var LogDebug func(string, ...interface{}) = nil
+var LogDebug func(string, ...interface{})
 
 func logError(format string, p ...interface{}) {
 	if LogError == nil {
