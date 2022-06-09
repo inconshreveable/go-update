@@ -82,6 +82,24 @@ If you desire a GUI element and visual integration with Fyne, you should check [
 
 To help you manage your key, sign binary and upload them to an online S3 bucket the `selfupdatectl` tool is provided. You can check its documentation [here](https://github.com/fynelabs/selfupdate/tree/main/cmd/selfupdatectl).
 
+## Loggin
+
+We provide three package wide variable: `LogError`, `LogInfo` and `LogDebug` that follow `log.Printf` API to provide an easy way to hook any logger in. To use it with go logger, you can just do
+
+```go
+selfupdate.LogError = log.Printf
+```
+
+If you are using logrus for example, you could do the following:
+
+```go
+selfupdate.LogError = logrus.Errorf
+selfupdate.LogInfo = logrus.Infof
+selfupdate.LogDebug = logrus.Debugf
+```
+
+Most logger module in the go ecosystem do provide an API that match the `log.Printf` and it should be straight forward to use in the same way as with logrus.
+
 ## Features
 
 - Cross platform support
