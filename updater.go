@@ -65,11 +65,13 @@ func (u *Updater) CheckNow() error {
 		return err
 	}
 	if !latest.Date.After(v.Date) {
+		logDebug("Local binary time (%v) is recent enough compared to the online version (%v).\n", v.Date.Format(time.RFC1123Z), latest.Date.Format(time.RFC1123Z))
 		return nil
 	}
 
 	if ask := u.conf.UpgradeConfirmCallback; ask != nil {
 		if !ask("New version found") {
+			logInfo("The user didn't confirm the upgrade.\n")
 			return nil
 		}
 	}
@@ -94,6 +96,7 @@ func (u *Updater) CheckNow() error {
 
 	if ask := u.conf.RestartConfirmCallback; ask != nil {
 		if !ask() {
+			logInfo("The user didn't confirm restarting the application after upgrade.\n")
 			return nil
 		}
 	}
@@ -110,13 +113,21 @@ func Manage(conf *Config) (*Updater, error) {
 
 	go func() {
 		if updater.conf.Schedule.FetchOnStart {
-			updater.CheckNow()
+			logInfo("Doing an initial upgrade check.\n")
+			err := updater.CheckNow()
+			if err != nil {
+				logError("Upgrade error: %v\n", err)
+			}
 		}
 
 		if updater.conf.Schedule.Interval != 0 {
 			for {
 				time.Sleep(updater.conf.Schedule.Interval)
-				updater.CheckNow()
+				logInfo("Scheduled upgrade check after %s.\n", updater.conf.Schedule.Interval)
+				err := updater.CheckNow()
+				if err != nil {
+					logError("Upgrade error: %v\n", err)
+				}
 			}
 		}
 	}()
