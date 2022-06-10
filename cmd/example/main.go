@@ -17,8 +17,15 @@ func main() {
 	// The public key above match the signature of the below file served by our CDN
 	httpSource := selfupdate.NewHTTPSource(nil, "http://geoffrey-test-artefacts.fynelabs.com/nomad.exe")
 	config := &selfupdate.Config{
-		Source:    httpSource,
-		Schedule:  selfupdate.Schedule{FetchOnStart: true, Interval: time.Minute * time.Duration(60)},
+		Source: httpSource,
+		Schedule: selfupdate.Schedule{
+			FetchOnStart: true,
+			Interval:     time.Minute * time.Duration(60),
+			At: selfupdate.ScheduleAt{
+				// Repeated update check hourly at half of the hour
+				Repeating: selfupdate.Hourly,
+				Time:      time.Date(0, 0, 0, 0, 30, 0, 0, time.UTC)},
+		},
 		PublicKey: publicKey,
 
 		// This is here to force an update by announcing a time so old that nothing existed

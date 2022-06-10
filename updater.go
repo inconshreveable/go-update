@@ -29,9 +29,25 @@ type Config struct {
 	ExitCallback           func(error)          // if present will be expected to handle app exit procedure
 }
 
+type Repeating int
+
+const (
+	None    Repeating = iota
+	Minutly           // Will schedule in the next minute and repeat it every minute after
+	Hourly            // Will schedule in the next hour and repeat it every hour after
+	Daily             // Will schedule next day and repeat it every day after
+	Monthly           // Will schedule next month and repeat it every month after
+)
+
+type ScheduleAt struct {
+	Repeating
+	time.Time // Offset time used to define when in a minute/hour/day/month to actually trigger the schedule
+}
+
 type Schedule struct {
 	FetchOnStart bool
 	Interval     time.Duration
+	At           ScheduleAt
 }
 
 type Version struct {
@@ -121,14 +137,37 @@ func Manage(conf *Config) (*Updater, error) {
 		}
 
 		if updater.conf.Schedule.Interval != 0 {
-			for {
-				time.Sleep(updater.conf.Schedule.Interval)
-				logInfo("Scheduled upgrade check after %s.\n", updater.conf.Schedule.Interval)
-				err := updater.CheckNow()
-				if err != nil {
-					logError("Upgrade error: %v\n", err)
+			go func() {
+				for {
+					time.Sleep(updater.conf.Schedule.Interval)
+					logInfo("Scheduled upgrade check after %s.\n", updater.conf.Schedule.Interval)
+					err := updater.CheckNow()
+					if err != nil {
+						logError("Upgrade error: %v\n", err)
+					}
 				}
-			}
+			}()
+		}
+
+		if updater.conf.Schedule.At.Repeating != None {
+			go func() {
+				for {
+					now := time.Now()
+					var next time.Time
+					switch updater.conf.Schedule.At.Repeating {
+					case Minutly:
+						next = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute()+1, updater.conf.Schedule.At.Second(), updater.conf.Schedule.At.Nanosecond(), time.Local)
+					case Hourly:
+						next = time.Date(now.Year(), now.Month(), now.Day(), now.Hour()+1, updater.conf.Schedule.At.Minute(), updater.conf.Schedule.At.Second(), updater.conf.Schedule.At.Nanosecond(), time.Local)
+					case Daily:
+						next = time.Date(now.Year(), now.Month(), now.Day()+1, updater.conf.Schedule.At.Hour(), updater.conf.Schedule.At.Minute(), updater.conf.Schedule.At.Second(), updater.conf.Schedule.At.Nanosecond(), time.Local)
+					case Monthly:
+						next = time.Date(now.Year(), now.Month()+1, updater.conf.Schedule.At.Day(), updater.conf.Schedule.At.Hour(), updater.conf.Schedule.At.Minute(), updater.conf.Schedule.At.Second(), updater.conf.Schedule.At.Nanosecond(), time.Local)
+					}
+					time.Sleep(next.Sub(now))
+					updater.CheckNow()
+				}
+			}()
 		}
 	}()
 
