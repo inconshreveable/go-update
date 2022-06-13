@@ -20,9 +20,10 @@ func main() {
 		Source: httpSource,
 		Schedule: selfupdate.Schedule{
 			FetchOnStart: true,
-			Interval:     time.Minute * time.Duration(60),
+			// If you want to check update on a regular interval uncomment the follwoing
+			// Interval:     time.Minute * time.Duration(60),
+			// Check for an update every day at 4.30 am local time
 			At: selfupdate.ScheduleAt{
-				// Repeated update check daily at 4.30 am
 				Repeating: selfupdate.Daily,
 				Time:      time.Date(0, 0, 0, 4, 30, 0, 0, time.Local)},
 		},
