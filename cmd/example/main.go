@@ -22,9 +22,9 @@ func main() {
 			FetchOnStart: true,
 			Interval:     time.Minute * time.Duration(60),
 			At: selfupdate.ScheduleAt{
-				// Repeated update check hourly at half of the hour
-				Repeating: selfupdate.Hourly,
-				Time:      time.Date(0, 0, 0, 0, 30, 0, 0, time.UTC)},
+				// Repeated update check daily at 4.30 am
+				Repeating: selfupdate.Daily,
+				Time:      time.Date(0, 0, 0, 4, 30, 0, 0, time.Local)},
 		},
 		PublicKey: publicKey,
 

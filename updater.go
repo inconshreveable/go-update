@@ -203,11 +203,11 @@ func nextScheduleAt(repeating Repeating, offset time.Time) time.Duration {
 	var next time.Time
 	switch repeating {
 	case Hourly:
-		next = time.Date(now.Year(), now.Month(), now.Day(), now.Hour()+1, offset.Minute(), offset.Second(), offset.Nanosecond(), time.Local)
+		next = time.Date(now.Year(), now.Month(), now.Day(), now.Hour()+1, offset.Minute(), offset.Second(), offset.Nanosecond(), offset.Location())
 	case Daily:
-		next = time.Date(now.Year(), now.Month(), now.Day()+1, offset.Hour(), offset.Minute(), offset.Second(), offset.Nanosecond(), time.Local)
+		next = time.Date(now.Year(), now.Month(), now.Day()+1, offset.Hour(), offset.Minute(), offset.Second(), offset.Nanosecond(), offset.Location())
 	case Monthly:
-		next = time.Date(now.Year(), now.Month()+1, offset.Day(), offset.Hour(), offset.Minute(), offset.Second(), offset.Nanosecond(), time.Local)
+		next = time.Date(now.Year(), now.Month()+1, offset.Day(), offset.Hour(), offset.Minute(), offset.Second(), offset.Nanosecond(), offset.Location())
 	}
 
 	return next.Sub(now)
