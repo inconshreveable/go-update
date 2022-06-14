@@ -177,20 +177,20 @@ func applyUpdate(r io.Reader, publicKey ed25519.PublicKey, signature [64]byte) (
 
 func triggerSchedule(updater *Updater) {
 	for {
-		var next time.Duration
+		var delay time.Duration
 
 		if updater.conf.Schedule.Interval != 0 {
-			next = updater.conf.Schedule.Interval
+			delay = updater.conf.Schedule.Interval
 		}
 		if updater.conf.Schedule.At.Repeating != None {
-			at := nextScheduleAt(updater.conf.Schedule.At.Repeating, updater.conf.Schedule.At.Time)
-			if next == 0 || at < next {
-				next = at
+			at := delayUntilNextTriggerAt(updater.conf.Schedule.At.Repeating, updater.conf.Schedule.At.Time)
+			if delay == 0 || at < delay {
+				delay = at
 			}
 		}
 
-		time.Sleep(next)
-		logInfo("Scheduled upgrade check after %s.\n", next)
+		time.Sleep(delay)
+		logInfo("Scheduled upgrade check after %s.\n", delay)
 		err := updater.CheckNow()
 		if err != nil {
 			logError("Upgrade error: %v\n", err)
@@ -198,7 +198,7 @@ func triggerSchedule(updater *Updater) {
 	}
 }
 
-func nextScheduleAt(repeating Repeating, offset time.Time) time.Duration {
+func delayUntilNextTriggerAt(repeating Repeating, offset time.Time) time.Duration {
 	now := time.Now()
 	var next time.Time
 	switch repeating {
