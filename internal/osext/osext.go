@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Extensions to the standard "os" package.
+// Package osext provide extensions to the standard "os" package.
 package osext
 
 import "path/filepath"
@@ -15,7 +15,7 @@ func Executable() (string, error) {
 	return filepath.Clean(p), err
 }
 
-// Returns same path as Executable, returns just the folder
+// ExecutableFolder returns same path as Executable, returns just the folder
 // path. Excludes the executable name and any trailing slash.
 func ExecutableFolder() (string, error) {
 	p, err := Executable()

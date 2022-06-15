@@ -164,9 +164,8 @@ func search(I []int, obuf, nbuf []byte, st, en int) (pos, n int) {
 
 		if x > y {
 			return I[st], x
-		} else {
-			return I[en], y
 		}
+		return I[en], y
 	}
 
 	x := st + (en-st)/2
