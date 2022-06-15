@@ -18,6 +18,7 @@ jobs:
     - name: Get dependencies
       run: |
         go install golang.org/x/tools/cmd/goimports@latest
+        go install golang.org/x/lint/golint@latest
         go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
         go install honnef.co/go/tools/cmd/staticcheck@v0.3.0
 
@@ -26,6 +27,9 @@ jobs:
 
     - name: Goimports
       run: test -z $(goimports -e -d . | tee /dev/stderr)
+
+    - name: Lint
+      run: golint -set_exit_status ./...
 
     - name: Gocyclo
       run: gocyclo -over 25 .
