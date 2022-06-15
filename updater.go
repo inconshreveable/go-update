@@ -29,9 +29,24 @@ type Config struct {
 	ExitCallback           func(error)          // if present will be expected to handle app exit procedure
 }
 
+type Repeating int
+
+const (
+	None    Repeating = iota
+	Hourly            // Will schedule in the next hour and repeat it every hour after
+	Daily             // Will schedule next day and repeat it every day after
+	Monthly           // Will schedule next month and repeat it every month after
+)
+
+type ScheduleAt struct {
+	Repeating
+	time.Time // Offset time used to define when in a minute/hour/day/month to actually trigger the schedule
+}
+
 type Schedule struct {
 	FetchOnStart bool
 	Interval     time.Duration
+	At           ScheduleAt
 }
 
 type Version struct {
@@ -120,15 +135,10 @@ func Manage(conf *Config) (*Updater, error) {
 			}
 		}
 
-		if updater.conf.Schedule.Interval != 0 {
-			for {
-				time.Sleep(updater.conf.Schedule.Interval)
-				logInfo("Scheduled upgrade check after %s.\n", updater.conf.Schedule.Interval)
-				err := updater.CheckNow()
-				if err != nil {
-					logError("Upgrade error: %v\n", err)
-				}
-			}
+		if updater.conf.Schedule.Interval != 0 || updater.conf.Schedule.At.Repeating != None {
+			go func() {
+				triggerSchedule(updater)
+			}()
 		}
 	}()
 
@@ -163,4 +173,42 @@ func applyUpdate(r io.Reader, publicKey ed25519.PublicKey, signature [64]byte) (
 		return "", err
 	}
 	return opts.TargetPath, nil
+}
+
+func triggerSchedule(updater *Updater) {
+	for {
+		var delay time.Duration
+
+		if updater.conf.Schedule.Interval != 0 {
+			delay = updater.conf.Schedule.Interval
+		}
+		if updater.conf.Schedule.At.Repeating != None {
+			at := delayUntilNextTriggerAt(updater.conf.Schedule.At.Repeating, updater.conf.Schedule.At.Time)
+			if delay == 0 || at < delay {
+				delay = at
+			}
+		}
+
+		time.Sleep(delay)
+		logInfo("Scheduled upgrade check after %s.\n", delay)
+		err := updater.CheckNow()
+		if err != nil {
+			logError("Upgrade error: %v\n", err)
+		}
+	}
+}
+
+func delayUntilNextTriggerAt(repeating Repeating, offset time.Time) time.Duration {
+	now := time.Now()
+	var next time.Time
+	switch repeating {
+	case Hourly:
+		next = time.Date(now.Year(), now.Month(), now.Day(), now.Hour()+1, offset.Minute(), offset.Second(), offset.Nanosecond(), offset.Location())
+	case Daily:
+		next = time.Date(now.Year(), now.Month(), now.Day()+1, offset.Hour(), offset.Minute(), offset.Second(), offset.Nanosecond(), offset.Location())
+	case Monthly:
+		next = time.Date(now.Year(), now.Month()+1, offset.Day(), offset.Hour(), offset.Minute(), offset.Second(), offset.Nanosecond(), offset.Location())
+	}
+
+	return next.Sub(now)
 }
