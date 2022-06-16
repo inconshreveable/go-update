@@ -29,7 +29,8 @@ func Exists(path string) bool {
 	return true
 }
 
-// NewAWSSessionFromEnvironment create a new session from environment variable
+// NewAWSSessionFromEnvironment create a new session from environment variable.
+// This will be looking for the environment variable AWS_S3_ENDPOINT, AWS_S3_REGION and AWS_S3_BUCKET
 func NewAWSSessionFromEnvironment() (*AWSSession, error) {
 	return NewAWSSession("", "", os.Getenv("AWS_S3_ENDPOINT"), os.Getenv("AWS_S3_REGION"), os.Getenv("AWS_S3_BUCKET"))
 }

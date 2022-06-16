@@ -12,7 +12,7 @@ import (
 )
 
 // HTTPSource provide a Source that will download the update from a HTTP url.
-// It is expecting the signature expected to be at ${URL}.ed25519
+// It is expecting the signature file to be served at ${URL}.ed25519
 type HTTPSource struct {
 	client  *http.Client
 	baseURL string
