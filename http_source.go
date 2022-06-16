@@ -11,6 +11,8 @@ import (
 	"text/template"
 )
 
+// HTTPSource provide a Source that will download the update from a HTTP url.
+// It is expecting the signature file to be served at ${URL}.ed25519
 type HTTPSource struct {
 	client  *http.Client
 	baseURL string
@@ -40,11 +42,12 @@ func NewHTTPSource(client *http.Client, base string) Source {
 		client = http.DefaultClient
 	}
 
-	base = replaceUrlTemplate(base)
+	base = replaceURLTemplate(base)
 
 	return &HTTPSource{client: client, baseURL: base}
 }
 
+// Get will return if it succeed an io.ReaderCloser to the new executable being downloaded and its length
 func (h *HTTPSource) Get(v *Version) (io.ReadCloser, int64, error) {
 	request, err := http.NewRequest("GET", h.baseURL, nil)
 	if err != nil {
@@ -65,6 +68,7 @@ func (h *HTTPSource) Get(v *Version) (io.ReadCloser, int64, error) {
 	return response.Body, response.ContentLength, nil
 }
 
+// GetSignature will return the content of  ${URL}.ed25519
 func (h *HTTPSource) GetSignature() ([64]byte, error) {
 	resp, err := h.client.Get(h.baseURL + ".ed25519")
 	if err != nil {
@@ -92,6 +96,7 @@ func (h *HTTPSource) GetSignature() ([64]byte, error) {
 	return r, nil
 }
 
+// LatestVersion will return the URL Last-Modified time
 func (h *HTTPSource) LatestVersion() (*Version, error) {
 	resp, err := h.client.Head(h.baseURL)
 	if err != nil {
@@ -111,7 +116,7 @@ func (h *HTTPSource) LatestVersion() (*Version, error) {
 	return &Version{Date: t}, nil
 }
 
-func replaceUrlTemplate(base string) string {
+func replaceURLTemplate(base string) string {
 	ext := ""
 	if runtime.GOOS == "windows" {
 		ext = ".exe"

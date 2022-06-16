@@ -11,17 +11,19 @@ import (
 // ErrNotSupported is returned by `Manage` when it is not possible to manage the current application.
 var ErrNotSupported = errors.New("operating system not supported")
 
+// Source define an interface that is able to get an update
 type Source interface {
-	Get(*Version) (io.ReadCloser, int64, error)
-	GetSignature() ([64]byte, error)
-	LatestVersion() (*Version, error)
+	Get(*Version) (io.ReadCloser, int64, error) // Get the executable to be updated to
+	GetSignature() ([64]byte, error)            // Get the signature that match the executable
+	LatestVersion() (*Version, error)           // Get the latest version information to determine if we should trigger an update
 }
 
+// Config define extra parameter necessary to manage the updating process
 type Config struct {
-	Current   *Version
-	Source    Source
-	Schedule  Schedule
-	PublicKey ed25519.PublicKey
+	Current   *Version          // If present will define the current version of the executable that need update
+	Source    Source            // Necessary Source for update
+	Schedule  Schedule          // Define when to trigger an update
+	PublicKey ed25519.PublicKey // The public key that match the private key used to generate the signature of future update
 
 	ProgressCallback       func(float64, error) // if present will call back with 0.0 at the start, rising through to 1.0 at the end if the progress is known. A negative start number will be sent if size is unknown, any error will pass as is and the process is considered done
 	RestartConfirmCallback func() bool          // if present will ask for user acceptance before restarting app
@@ -29,38 +31,48 @@ type Config struct {
 	ExitCallback           func(error)          // if present will be expected to handle app exit procedure
 }
 
+// Repeating pattern for scheduling update at a specific time
 type Repeating int
 
 const (
-	None    Repeating = iota
-	Hourly            // Will schedule in the next hour and repeat it every hour after
-	Daily             // Will schedule next day and repeat it every day after
-	Monthly           // Will schedule next month and repeat it every month after
+	// None will not schedule
+	None Repeating = iota
+	// Hourly will schedule in the next hour and repeat it every hour after
+	Hourly
+	// Daily will schedule next day and repeat it every day after
+	Daily
+	// Monthly will schedule next month and repeat it every month after
+	Monthly
 )
 
+// ScheduleAt define when a repeating update at a specific time should be triggered
 type ScheduleAt struct {
-	Repeating
+	Repeating // The pattern to enforce for the repeating schedule
 	time.Time // Offset time used to define when in a minute/hour/day/month to actually trigger the schedule
 }
 
+// Schedule define when to trigger an update
 type Schedule struct {
-	FetchOnStart bool
-	Interval     time.Duration
-	At           ScheduleAt
+	FetchOnStart bool          // Trigger when the updater is created
+	Interval     time.Duration // Trigger at regular interval
+	At           ScheduleAt    // Trigger at a specific time
 }
 
+// Version define an executable versionning information
 type Version struct {
 	Number string    // if the app knows its version and supports checking metadata
 	Build  int       // if the app has a build number this could be compared
 	Date   time.Time // last update, could be mtime
 }
 
+// Updater is managing update for your application in the background
 type Updater struct {
 	lock       sync.Mutex
 	conf       *Config
 	executable string
 }
 
+// CheckNow will manually trigger a check of an update and if one is present will start the update process
 func (u *Updater) CheckNow() error {
 	u.lock.Lock()
 	defer u.lock.Unlock()
@@ -118,6 +130,7 @@ func (u *Updater) CheckNow() error {
 	return u.Restart()
 }
 
+// Restart once an update is done can trigger a restart of the binary. This is useful to implement a restart later policy.
 func (u *Updater) Restart() error {
 	return restart(u.conf.ExitCallback, u.executable)
 }

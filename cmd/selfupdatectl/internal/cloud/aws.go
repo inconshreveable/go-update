@@ -14,11 +14,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
+// AWSSession represent a live session to AWS services
 type AWSSession struct {
 	s      *session.Session
 	bucket string
 }
 
+// Exists return true if a path does really exist
 func Exists(path string) bool {
 	_, err := os.Stat(path)
 	if err != nil {
@@ -27,10 +29,13 @@ func Exists(path string) bool {
 	return true
 }
 
+// NewAWSSessionFromEnvironment create a new session from environment variable.
+// This will be looking for the environment variable AWS_S3_ENDPOINT, AWS_S3_REGION and AWS_S3_BUCKET
 func NewAWSSessionFromEnvironment() (*AWSSession, error) {
 	return NewAWSSession("", "", os.Getenv("AWS_S3_ENDPOINT"), os.Getenv("AWS_S3_REGION"), os.Getenv("AWS_S3_BUCKET"))
 }
 
+// NewAWSSession create a new session
 func NewAWSSession(akid string, secret string, endpoint string, region string, bucket string) (*AWSSession, error) {
 	var cred *credentials.Credentials
 
@@ -52,10 +57,12 @@ func NewAWSSession(akid string, secret string, endpoint string, region string, b
 	return &AWSSession{s: s, bucket: bucket}, nil
 }
 
+// GetCredentials from the established session
 func (a *AWSSession) GetCredentials() (credentials.Value, error) {
 	return a.s.Config.Credentials.Get()
 }
 
+// UploadFile to a S3 bucket
 func (a *AWSSession) UploadFile(localFile string, s3FilePath string) error {
 	file, err := os.Open(localFile)
 	if err != nil {
@@ -82,6 +89,7 @@ func (a *AWSSession) UploadFile(localFile string, s3FilePath string) error {
 	return err
 }
 
+// GetBucket associated with a session
 func (a *AWSSession) GetBucket() string {
 	return a.bucket
 }
@@ -98,10 +106,12 @@ var _ io.Reader = (*progressAWS)(nil)
 var _ io.ReaderAt = (*progressAWS)(nil)
 var _ io.Seeker = (*progressAWS)(nil)
 
+// Read file content
 func (pa *progressAWS) Read(p []byte) (int, error) {
 	return pa.File.Read(p)
 }
 
+// ReadAt specific offset in a file
 func (pa *progressAWS) ReadAt(p []byte, off int64) (int, error) {
 	n, err := pa.File.ReadAt(p, off)
 	if err != nil {
@@ -115,10 +125,12 @@ func (pa *progressAWS) ReadAt(p []byte, off int64) (int, error) {
 	return n, err
 }
 
+// Seek in a file
 func (pa *progressAWS) Seek(offset int64, whence int) (int64, error) {
 	return pa.File.Seek(offset, whence)
 }
 
+// Size return the file content length
 func (pa *progressAWS) Size() int64 {
 	return pa.contentLength
 }

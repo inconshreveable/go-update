@@ -13,11 +13,12 @@ type Patcher interface {
 
 type patchFn func(io.Reader, io.Writer, io.Reader) error
 
+// Patch will call the patchFn function to satisfy a Patcher interface
 func (fn patchFn) Patch(old io.Reader, new io.Writer, patch io.Reader) error {
 	return fn(old, new, patch)
 }
 
-// NewBSDifferPatcher returns a new Patcher that applies binary patches using
+// NewBSDiffPatcher returns a new Patcher that applies binary patches using
 // the bsdiff algorithm. See http://www.daemonology.net/bsdiff/
 func NewBSDiffPatcher() Patcher {
 	return patchFn(binarydist.Patch)

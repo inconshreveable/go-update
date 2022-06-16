@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 )
 
+// ErrCorrupt returned when a patch is corrupted
 var ErrCorrupt = errors.New("corrupt patch")
 
 // Patch applies patch to old, according to the bspatch algorithm,

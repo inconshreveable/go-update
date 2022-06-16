@@ -49,7 +49,7 @@ func TestHTTPSourceCheckSignature(t *testing.T) {
 	assert.False(t, ok)
 }
 
-func TestReplaceUrlTemplate(t *testing.T) {
+func TestReplaceURLTemplate(t *testing.T) {
 	nochange := "http://localhost/nomad-windows-amd64.exe"
 	change := "http://localhost/nomad-{{.OS}}-{{.Arch}}{{.Ext}}"
 	expected := ""
@@ -59,10 +59,10 @@ func TestReplaceUrlTemplate(t *testing.T) {
 		expected = "http://localhost/nomad-" + runtime.GOOS + "-" + runtime.GOARCH
 	}
 
-	r := replaceUrlTemplate(nochange)
+	r := replaceURLTemplate(nochange)
 	assert.Equal(t, nochange, r)
 
-	r = replaceUrlTemplate(change)
+	r = replaceURLTemplate(change)
 	assert.NotEqual(t, change, r)
 	assert.Equal(t, expected, r)
 }

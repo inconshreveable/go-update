@@ -200,6 +200,7 @@ type rollbackErr struct {
 	rollbackErr error // error encountered while rolling back
 }
 
+// Options give additional parameters when calling Apply
 type Options struct {
 	// TargetPath defines the path to the file to update.
 	// The emptry string means 'the executable file of the running program'.
@@ -277,9 +278,8 @@ func (o *Options) SetPublicKeyPEM(pembytes []byte) error {
 func (o *Options) getPath() (string, error) {
 	if o.TargetPath == "" {
 		return getExecutableRealPath()
-	} else {
-		return o.TargetPath, nil
 	}
+	return o.TargetPath, nil
 }
 
 func (o *Options) applyPatch(patch io.Reader) ([]byte, error) {
@@ -318,13 +318,12 @@ func (o *Options) verifySignature(updated []byte) error {
 			return fmt.Errorf("invalid ed25519 signature")
 		}
 		return nil
-	} else {
-		checksum, err := checksumFor(o.Hash, updated)
-		if err != nil {
-			return err
-		}
-		return o.Verifier.VerifySignature(checksum, o.Signature, o.Hash, o.PublicKey)
 	}
+	checksum, err := checksumFor(o.Hash, updated)
+	if err != nil {
+		return err
+	}
+	return o.Verifier.VerifySignature(checksum, o.Signature, o.Hash, o.PublicKey)
 }
 
 func checksumFor(h crypto.Hash, payload []byte) ([]byte, error) {
