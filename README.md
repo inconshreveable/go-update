@@ -1,5 +1,7 @@
 # self-update: Build self-updating Fyne programs [![godoc reference](https://godoc.org/github.com/fynelabs/self-update?status.png)](https://godoc.org/github.com/fynelabs/self-update)
 
+[![Coverage Status](https://coveralls.io/repos/github/fynelabs/selfupdate/badge.svg?branch=main)](https://coveralls.io/github/fynelabs/selfupdate?branch=main)
+
 Package update provides functionality to implement secure, self-updating Fyne programs (or other single-file targets)
 
 A program can update itself by replacing its executable file with a new version.
