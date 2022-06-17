@@ -25,3 +25,16 @@ jobs:
 
     - name: Test
       run: go test -tags ci ./...
+
+    - name: Update coverage
+      run: |
+        GO111MODULE=off go get github.com/mattn/goveralls
+        set -e
+        go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
+      if: ${{ runner.os == 'Linux' }}
+
+    - name: Update PR Coverage
+      uses: shogo82148/actions-goveralls@v1
+      with:
+        path-to-profile: coverage.out
+      if: ${{ runner.os == 'Linux' && matrix.go-version == '1.18' }}
