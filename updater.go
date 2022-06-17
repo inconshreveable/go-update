@@ -212,7 +212,7 @@ func triggerSchedule(updater *Updater) {
 }
 
 func delayUntilNextTriggerAt(repeating Repeating, offset time.Time) time.Duration {
-	now := time.Now()
+	now := time.Now().In(offset.Location())
 	var next time.Time
 	switch repeating {
 	case Hourly:
