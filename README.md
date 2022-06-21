@@ -111,7 +111,7 @@ Most logger module in the go ecosystem do provide an API that match the `log.Pri
 - Support for updating arbitrary files
 
 ## API Compatibility Promises
-The master branch of `selfupdate` is *not* guaranteed to have a stable API over time. For any production application, you should vendor your dependency on `selfupdate` with `go vendor`.
+The master branch of `selfupdate` is *not* guaranteed to have a stable API over time. Still we will try hard to not break its API unecessarily and will follow a proper versionning of our release when necessary.
 
 The `selfupdate` package makes the following promises about API compatibility:
 1. A list of all API-breaking changes will be documented in this README.
@@ -119,6 +119,7 @@ The `selfupdate` package makes the following promises about API compatibility:
 
 ## API Breaking Changes
 - **May 30, 2022**: Many changes moving to a new API that will be supported going forward.
+- **June 22, 2022**: First tagged release, v0.1.0.
 
 ## License
 Apache
