@@ -111,7 +111,7 @@ Most logger module in the go ecosystem do provide an API that match the `log.Pri
 - Support for updating arbitrary files
 
 ## API Compatibility Promises
-The master branch of `selfupdate` is *not* guaranteed to have a stable API over time. Still we will try hard to not break its API unecessarily and will follow a proper versionning of our release when necessary.
+The main branch of `selfupdate` is *not* guaranteed to have a stable API over time. Still we will try hard to not break its API unecessarily and will follow a proper versionning of our release when necessary.
 
 The `selfupdate` package makes the following promises about API compatibility:
 1. A list of all API-breaking changes will be documented in this README.
