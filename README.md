@@ -123,3 +123,11 @@ The `selfupdate` package makes the following promises about API compatibility:
 
 ## License
 Apache
+
+## Sponsors
+
+This project is kindly sponsored by the following companies:
+
+<a href="https://dentagraphics.com/" style="text-decoration: none">
+<img width="190" src="img/sponsor/dentagraphics.jpg" />
+</a>
